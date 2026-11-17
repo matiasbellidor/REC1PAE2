@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+<link rel="preload" as="image" type="image/webp" href="emojis/classical-building.webp">
 <script>
   /* Tema guardado antes de pintar (preferencia de este navegador). */
   (function () {
@@ -71,6 +72,9 @@ button { font: inherit; color: inherit; }
 a { color: var(--primary); }
 :focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: 6px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+/* Emojis de Apple como imagen: miden según el texto que los rodea. */
+img.emo { display: inline-block; width: 1.25em; height: 1.25em; vertical-align: -0.28em; object-fit: contain; }
+.brand-mark img.emo, .splash-emoji img.emo, .node img.emo, .badge img.emo, .boss-emoji img.emo, .hp img.emo, .result .big img.emo, .confetti img.emo, .icon-btn img.emo { width: 1em; height: 1em; vertical-align: middle; }
 .skip { position: absolute; left: var(--s4); top: -64px; z-index: 50; background: var(--surface); padding: var(--s2) var(--s4); border-radius: var(--r-sm); }
 .skip:focus { top: var(--s2); }
 
@@ -281,13 +285,13 @@ footer.foot p + p { margin-top: var(--s2); }
 </head>
 <body>
 <a class="skip" href="#app">Saltar al contenido</a>
-<div class="splash" aria-hidden="true"><div class="splash-in"><span class="splash-emoji">🏛️</span><span class="splash-title">Palacio Estadístico</span></div></div>
+<div class="splash" aria-hidden="true"><div class="splash-in"><span class="splash-emoji"><img class="emo" src="emojis/classical-building.webp" alt="" width="160" height="160" data-emoji="classical-building"></span><span class="splash-title">Palacio Estadístico</span></div></div>
 <header class="top">
   <div class="top-in">
-    <a class="brand" href="#/" aria-label="Palacio Estadístico: volver al mapa"><span class="brand-mark" aria-hidden="true">🏛️</span><span class="brand-name">Palacio<span class="bn-long"> Estadístico</span></span></a>
-    <span class="stat stat-xp" title="Puntos de experiencia"><span aria-hidden="true">⭐</span><span id="xp">0</span><span class="sr-only"> puntos de experiencia</span></span>
-    <span class="stat stat-fire" title="Respuestas correctas seguidas"><span aria-hidden="true">🔥</span><span id="streak">0</span><span class="sr-only"> correctas seguidas</span></span>
-    <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar a tema oscuro">🌙</button>
+    <a class="brand" href="#/" aria-label="Palacio Estadístico: volver al mapa"><span class="brand-mark" aria-hidden="true"><img class="emo" src="emojis/classical-building.webp" alt="" width="160" height="160" data-emoji="classical-building"></span><span class="brand-name">Palacio<span class="bn-long"> Estadístico</span></span></a>
+    <span class="stat stat-xp" title="Puntos de experiencia"><span aria-hidden="true"><img class="emo" src="emojis/star.webp" alt="" width="160" height="160" data-emoji="star"></span><span id="xp">0</span><span class="sr-only"> puntos de experiencia</span></span>
+    <span class="stat stat-fire" title="Respuestas correctas seguidas"><span aria-hidden="true"><img class="emo" src="emojis/fire.webp" alt="" width="160" height="160" data-emoji="fire"></span><span id="streak">0</span><span class="sr-only"> correctas seguidas</span></span>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar a tema oscuro"><img class="emo" src="emojis/crescent-moon.webp" alt="" width="160" height="160" data-emoji="crescent-moon"></button>
   </div>
 </header>
 <main id="app" tabindex="-1"></main>
@@ -295,6 +299,7 @@ footer.foot p + p { margin-top: var(--s2); }
   <p class="mj-note">Las fórmulas se ven en texto LaTeX porque no cargó MathJax (hace falta conexión a internet la primera vez).</p>
   <p>Ejercicios: Parcial AEII 1C 2026 (Temas 1, 2 y B), Prácticas 1 a 5, Ejercicios de Estimadores y de FGM y Ejercitación de potencia del test. Cátedra Tito Lasanta, FCE-UBA. Las soluciones se verificaron numéricamente; si algo no coincide con lo que da la cátedra, gana la cátedra.</p>
   <p>Tu progreso se guarda solo en este navegador (sin cuentas, sin cookies, sin analítica). Lo podés borrar desde el mapa.</p>
+  <p>Emojis: imágenes de Apple (© Apple Inc.), tomadas de Emojipedia.</p>
 </footer>
 <dialog id="dlg" aria-labelledby="dlgTitle"><h2 id="dlgTitle"></h2><p id="dlgText"></p><div class="btn-row"><button class="btn btn-ghost" type="button" id="dlgNo">Volver</button><button class="btn" type="button" id="dlgYes">Aceptar</button></div></dialog>
 <div id="live" class="sr-only" aria-live="polite"></div>
@@ -984,9 +989,29 @@ PALACIO.levels.push({
       return p.length < 2 ? '\\(' + tex + '\\)' : p.map(function (x) { return '\\(' + x + '\\)'; }).join('<wbr>');
     });
   }
+  /* Emojis de Apple: cada carácter se reemplaza por su imagen (emojis/<nombre>.webp, 160 px, © Apple vía Emojipedia).
+     Los símbolos de control (✕, ←, →, ✓, ✗) quedan como texto. */
+  var VS16 = String.fromCharCode(0xFE0F);
+  var EMO_SRC = {
+    '🏛️': 'classical-building', '👑': 'crown', '🔁': 'repeat', '⚔️': 'crossed-swords', '⭐': 'star', '🌙': 'crescent-moon',
+    '❤️': 'red-heart', '💔': 'broken-heart', '📜': 'scroll', '🔥': 'fire', '🪞': 'mirror', '🧙': 'mage', '⚙️': 'gear',
+    '🤖': 'robot', '🌲': 'evergreen-tree', '🐉': 'dragon', '🎪': 'circus-tent', '👻': 'ghost', '⚖️': 'balance-scale',
+    '🦹': 'supervillain', '🏰': 'castle', '🗿': 'moai', '☀️': 'sun', '🔒': 'locked', '▶️': 'play-button', '🗑️': 'wastebasket',
+    '⚠️': 'warning', '📍': 'round-pushpin', '👀': 'eyes', '🔑': 'key', '🗝️': 'old-key', '🚪': 'door', '📄': 'page-facing-up',
+    '✅': 'check-mark-button', '❌': 'cross-mark', '📚': 'books', '🎉': 'party-popper', '✨': 'sparkles'
+  };
+  var EMO = {};
+  Object.keys(EMO_SRC).forEach(function (k) { EMO[k.split(VS16).join('')] = EMO_SRC[k]; });
+  var EMO_RE = new RegExp('(' + Object.keys(EMO).join('|') + ')' + VS16 + '?', 'gu');
+  function emojify(html) {
+    return String(html).replace(EMO_RE, function (_, ch) {
+      var n = EMO[ch];
+      return '<img class="emo" src="emojis/' + n + '.webp" alt="" width="160" height="160" decoding="async" data-emoji="' + n + '">';
+    });
+  }
   function paint(html, focusSel) {
     clearMath();
-    app.innerHTML = brk(html);
+    app.innerHTML = emojify(brk(html));
     toTop();
     typeset(app);
     var f = focusSel && $(focusSel, app);
@@ -1002,7 +1027,7 @@ PALACIO.levels.push({
   }
   function paintThemeBtn() {
     var dark = currentTheme() === 'dark';
-    themeBtn.textContent = dark ? '☀️' : '🌙';
+    themeBtn.innerHTML = emojify(dark ? '☀️' : '🌙');
     themeBtn.setAttribute('aria-label', dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
   }
   themeBtn.addEventListener('click', function () {
@@ -1131,7 +1156,7 @@ PALACIO.levels.push({
     var steps = run.L.boss.steps, left = 0;
     steps.forEach(function (s) { if (!run.solved[s.id]) left++; });
     var hearts = '';
-    for (var i = 0; i < steps.length; i++) hearts += i < left ? '❤️' : '🖤';
+    for (var i = 0; i < steps.length; i++) hearts += i < left ? '❤️' : '💔';
     return '<div class="hp" role="img" aria-label="Vida del jefe: ' + left + ' de ' + steps.length + '">' + hearts + '</div>';
   }
 
@@ -1254,7 +1279,7 @@ PALACIO.levels.push({
         var be = $('#bossEmoji');
         if (be && !reduceMotion) { be.classList.remove('hit'); void be.offsetWidth; be.classList.add('hit'); }
         var hp = $('.hp', app);
-        if (hp) hp.outerHTML = hpHtml();
+        if (hp) hp.outerHTML = emojify(hpHtml());
       }
     } else {
       streak = 0;
@@ -1264,13 +1289,13 @@ PALACIO.levels.push({
     paintStats();
     var fb = $('#fb');
     fb.className = 'fb ' + (ok ? 'ok' : 'bad');
-    fb.innerHTML = brk(
+    fb.innerHTML = emojify(brk(
       '<h2>' + (ok ? '✅ ¡Correcto!' : '❌ Todavía no') + '</h2>' +
       (ok ? '' : '<p class="right">Respuesta correcta: ' + (q.type === 'num' ? fmtNum(q.ans) : q.opts[0]) + '</p>') +
       '<p class="why">🏛️ ' + q.why + '</p>' +
       '<details' + (ok ? '' : ' open') + '><summary>' + (ok ? 'Ver la resolución' : 'Resolución paso a paso') + '</summary>' +
       '<ol class="steps">' + q.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol></details>' +
-      (ok ? '' : '<p class="small muted" style="margin-top:8px">🔁 Esta pregunta vuelve al final de la sala.</p>'));
+      (ok ? '' : '<p class="small muted" style="margin-top:8px">🔁 Esta pregunta vuelve al final de la sala.</p>')));
     typeset(fb);
     say(ok ? 'Correcto.' : 'Incorrecto. Se muestra la resolución.');
     var btn = $('#checkBtn');
@@ -1359,7 +1384,7 @@ PALACIO.levels.push({
     var set = ['🎉', '⭐', '👑', '✨', '🏛️'];
     for (var i = 0; i < 26; i++) {
       var s = document.createElement('span');
-      s.textContent = set[i % set.length];
+      s.innerHTML = emojify(set[i % set.length]);
       s.style.left = Math.round(Math.random() * 100) + '%';
       s.style.animationDelay = Math.round(Math.random() * 500) + 'ms';
       box.appendChild(s);
