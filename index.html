@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Palacio Estadístico</title>
+<meta name="description" content="Juego para repasar el 1er parcial de Análisis Estadístico II (FCE-UBA, cátedra Lasanta) con la técnica del palacio de la memoria: estimadores, FGM, distribuciones, intervalos, tests y ANOVA.">
+<meta name="theme-color" content="#5B2BD6">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%235B2BD6'/%3E%3Cpath d='M4.5 12.5 16 5l11.5 7.5z' fill='%23fff'/%3E%3Crect x='6.5' y='19' width='5' height='8' rx='1.2' fill='%23F2B705'/%3E%3Crect x='13.5' y='14' width='5' height='13' rx='1.2' fill='%23fff'/%3E%3Crect x='20.5' y='19' width='5' height='8' rx='1.2' fill='%23F2B705'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+<script>
+  /* Tema guardado antes de pintar (preferencia de este navegador). */
+  (function () {
+    try {
+      var t = localStorage.getItem('palacio-estadistico:tema');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
+<style>
+:root {
+  --bg: #F6F4FB; --surface: #FFFFFF; --surface-2: #EFEBFA; --ink: #1B1530; --muted: #5B5470; --line: #E2DDF0;
+  --primary: #5B2BD6; --primary-press: #4320A8; --on-primary: #FFFFFF; --primary-tint: #EDE7FF;
+  --ok: #1B7A34; --ok-press: #135C26; --on-ok: #FFFFFF; --ok-tint: #E4F6E8;
+  --bad: #C42B2B; --bad-press: #962020; --on-bad: #FFFFFF; --bad-tint: #FDE9E9;
+  --gold: #F2B705; --gold-ink: #6B4D00; --warn-tint: #FFF4D6;
+  --h1: #5B2BD6; --h2: #A84A08; --h3: #0F766E; --h4: #1D5FD1; --h5: #B4235A; --h6: #8A5A00;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px; --s8: 64px;
+  --r-sm: 8px; --r-md: 16px; --r-pill: 999px;
+  --shadow: 0 8px 24px rgba(27, 21, 48, .08);
+  --dur: 180ms;
+  --font: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #120F1C; --surface: #1C1829; --surface-2: #262038; --ink: #F2EFFA; --muted: #B9B2CF; --line: #342C4D;
+    --primary: #A98BFF; --primary-press: #6F52D9; --on-primary: #140F24; --primary-tint: #2C2347;
+    --ok: #5BD27A; --ok-press: #2F9A4D; --on-ok: #0B1A10; --ok-tint: #12301C;
+    --bad: #FF8A8A; --bad-press: #C95050; --on-bad: #2A0909; --bad-tint: #3A1518;
+    --gold: #F2C14E; --gold-ink: #F2C14E; --warn-tint: #33280F;
+    --h1: #A98BFF; --h2: #FFA25C; --h3: #4FD1C5; --h4: #7AA7FF; --h5: #FF7AA8; --h6: #F2C14E;
+    --shadow: 0 8px 24px rgba(0, 0, 0, .35);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #120F1C; --surface: #1C1829; --surface-2: #262038; --ink: #F2EFFA; --muted: #B9B2CF; --line: #342C4D;
+  --primary: #A98BFF; --primary-press: #6F52D9; --on-primary: #140F24; --primary-tint: #2C2347;
+  --ok: #5BD27A; --ok-press: #2F9A4D; --on-ok: #0B1A10; --ok-tint: #12301C;
+  --bad: #FF8A8A; --bad-press: #C95050; --on-bad: #2A0909; --bad-tint: #3A1518;
+  --gold: #F2C14E; --gold-ink: #F2C14E; --warn-tint: #33280F;
+  --h1: #A98BFF; --h2: #FFA25C; --h3: #4FD1C5; --h4: #7AA7FF; --h5: #FF7AA8; --h6: #F2C14E;
+  --shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 400 16px/1.55 var(--font); letter-spacing: .005em;
+  min-height: 100vh; min-height: 100dvh; overflow-x: hidden;
+}
+h1, h2, h3 { line-height: 1.2; letter-spacing: -.01em; margin: 0; }
+p { margin: 0; }
+button { font: inherit; color: inherit; }
+a { color: var(--primary); }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; border-radius: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: var(--s4); top: -64px; z-index: 50; background: var(--surface); padding: var(--s2) var(--s4); border-radius: var(--r-sm); }
+.skip:focus { top: var(--s2); }
+
+/* Barras de scroll con la identidad del palacio */
+::-webkit-scrollbar { width: 12px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--primary) 55%, var(--surface)); border-radius: var(--r-pill); border: 3px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+::-webkit-scrollbar-button { display: none; }
+@supports not selector(::-webkit-scrollbar) {
+  html, .mx, mjx-container { scrollbar-color: color-mix(in srgb, var(--primary) 55%, var(--surface)) transparent; scrollbar-width: thin; }
+}
+
+/* Intro de marca */
+.splash { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; background: var(--bg); pointer-events: none; animation: splash-out .32s ease .78s forwards; }
+.splash-in { display: grid; justify-items: center; gap: var(--s3); }
+.splash-emoji { font-size: 64px; line-height: 1; animation: splash-pop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+.splash-title { font-weight: 900; font-size: 24px; color: var(--primary); animation: splash-up .45s ease .18s both; }
+@keyframes splash-pop { from { transform: scale(.4) rotate(-8deg); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes splash-up { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes splash-out { to { opacity: 0; visibility: hidden; } }
+
+/* Encabezado */
+.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-bottom: 2px solid var(--line); }
+.top-in { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4); min-height: 56px; }
+.brand { display: flex; align-items: center; gap: var(--s2); font-weight: 900; font-size: 18px; color: var(--ink); text-decoration: none; margin-right: auto; min-width: 0; }
+.brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 429px) { .bn-long { display: none; } }
+@media (max-width: 339px) { .brand-name { display: none; } }
+.brand-mark { font-size: 24px; }
+.stat { display: inline-flex; align-items: center; gap: var(--s1); font-weight: 800; font-size: 16px; padding: var(--s1) var(--s2); border-radius: var(--r-pill); white-space: nowrap; }
+.stat-xp { color: var(--gold-ink); }
+.stat-fire { color: var(--h2); }
+.icon-btn { width: 44px; height: 44px; border-radius: var(--r-md); border: 2px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; font-size: 20px; }
+
+/* Contenedores */
+main { max-width: 760px; margin: 0 auto; padding: var(--s5) var(--s4) var(--s8); }
+.stack > * + * { margin-top: var(--s4); }
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: var(--r-md); padding: var(--s5) var(--s4); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.kicker { font-size: 14px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.mx { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+mjx-container[display="true"] { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 2px 0; margin: var(--s2) 0 !important; }
+mjx-container { max-width: 100%; }
+mjx-container.mjx-wide { display: block; overflow-x: auto; overflow-y: hidden; padding: 2px 0 6px; }
+.no-mathjax .mj-note { display: block; }
+.mj-note { display: none; background: var(--warn-tint); border-radius: var(--r-sm); padding: var(--s2) var(--s3); font-size: 14px; }
+
+/* Botones (relieve tipo juego) */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: var(--s3) var(--s5); border: 0; border-radius: var(--r-md); background: var(--primary); color: var(--on-primary); font: 800 17px/1.2 var(--font); letter-spacing: .01em; text-decoration: none; cursor: pointer; box-shadow: 0 4px 0 var(--primary-press); transition: transform var(--dur), box-shadow var(--dur), filter var(--dur); }
+.btn:active { transform: translateY(4px); box-shadow: 0 0 0 var(--primary-press); }
+.btn[disabled] { background: var(--line); color: var(--muted); box-shadow: 0 4px 0 color-mix(in srgb, var(--line) 70%, #000); cursor: not-allowed; transform: none; }
+.btn-block { width: 100%; }
+.btn-ghost { background: var(--surface); color: var(--primary); border: 2px solid var(--line); box-shadow: 0 4px 0 var(--line); }
+.btn-ghost:active { box-shadow: 0 0 0 var(--line); }
+.btn-ok { background: var(--ok); color: var(--on-ok); box-shadow: 0 4px 0 var(--ok-press); }
+.btn-bad { background: var(--bad); color: var(--on-bad); box-shadow: 0 4px 0 var(--bad-press); }
+.btn-row { display: flex; flex-wrap: wrap; gap: var(--s3); }
+.btn-row > .btn { flex: 1 1 200px; }
+@media (hover: hover) and (pointer: fine) {
+  .btn:not([disabled]):hover { filter: brightness(1.06); }
+  .opt:not(.is-locked):hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--line)); }
+  .room-node:hover .node { transform: translateY(-2px); }
+}
+
+/* Mapa del palacio */
+.hero h1 { font-size: 32px; font-weight: 900; }
+.hero p { margin-top: var(--s2); max-width: 60ch; }
+.bar { height: 16px; background: var(--line); border-radius: var(--r-pill); overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--primary); border-radius: inherit; transition: width .4s ease; position: relative; }
+.bar > i::after { content: ""; position: absolute; left: 8px; right: 8px; top: 3px; height: 4px; border-radius: var(--r-pill); background: rgba(255, 255, 255, .35); }
+.bar-label { display: flex; justify-content: space-between; font-weight: 800; font-size: 14px; margin-bottom: var(--s2); }
+.path { list-style: none; margin: var(--s6) 0 0; padding: 0; position: relative; }
+.path::before { content: ""; position: absolute; left: 39px; top: 40px; bottom: 40px; border-left: 4px dashed var(--line); }
+.room-item + .room-item { margin-top: var(--s5); }
+.room-node { display: flex; align-items: center; gap: var(--s4); width: 100%; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; position: relative; }
+.node { flex: none; width: 80px; height: 80px; border-radius: 50%; display: grid; place-items: center; font-size: 36px; background: color-mix(in srgb, var(--hue) 16%, var(--surface)); border: 4px solid var(--hue); box-shadow: 0 6px 0 color-mix(in srgb, var(--hue) 60%, #000); transition: transform var(--dur); position: relative; }
+.node .badge { position: absolute; right: -6px; bottom: -6px; font-size: 22px; line-height: 1; }
+.room-text { flex: 1; min-width: 0; background: var(--surface); border: 2px solid var(--line); border-radius: var(--r-md); padding: var(--s3) var(--s4); }
+.room-text b { display: block; font-size: 18px; font-weight: 800; }
+.room-text .topic { display: block; font-size: 14px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; gap: var(--s1); margin-top: var(--s2); padding: 2px var(--s2); border-radius: var(--r-pill); font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; background: var(--surface-2); color: var(--muted); }
+.chip-done { background: var(--ok-tint); color: var(--ok); }
+.chip-now { background: var(--primary-tint); color: var(--primary); }
+.room-item.is-locked .node { filter: grayscale(.85); opacity: .7; }
+@media (min-width: 640px) {
+  .room-item:nth-child(even) { padding-left: 96px; }
+  .path::before { left: 87px; }
+}
+
+/* FAQ en acordeón */
+.faq details { border-top: 2px solid var(--line); }
+.faq details:last-of-type { border-bottom: 2px solid var(--line); }
+.faq summary { cursor: pointer; font-weight: 800; padding: var(--s3) 0; list-style: none; display: flex; justify-content: space-between; gap: var(--s3); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; font-weight: 900; color: var(--primary); }
+.faq details[open] summary::after { content: "−"; }
+.faq details > div { padding-bottom: var(--s4); max-width: 65ch; }
+
+/* Sala */
+.room-head { display: flex; gap: var(--s4); align-items: center; }
+.room-head .node { width: 72px; height: 72px; font-size: 32px; }
+.room-head h1 { font-size: 28px; font-weight: 900; }
+.scene dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s4); }
+.scene dt { font-weight: 800; font-size: 14px; color: var(--hue, var(--primary)); letter-spacing: .04em; text-transform: uppercase; }
+.scene dd { margin: var(--s1) 0 0; max-width: 68ch; }
+.keys ul { margin: var(--s3) 0 0; padding-left: var(--s5); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s2); }
+.warn { background: var(--warn-tint); border: 2px solid color-mix(in srgb, var(--gold) 55%, var(--line)); border-radius: var(--r-md); padding: var(--s4); }
+.back { display: inline-flex; align-items: center; gap: var(--s1); font-weight: 800; text-decoration: none; min-height: 44px; }
+
+/* Juego */
+.play-top { display: flex; align-items: center; gap: var(--s3); }
+.play-top .bar { flex: 1; }
+.phase { font-weight: 800; font-size: 14px; color: var(--muted); margin-top: var(--s2); display: flex; justify-content: space-between; gap: var(--s3); }
+.src { display: inline-flex; gap: var(--s1); align-items: center; font-size: 12px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; color: var(--hue, var(--primary)); background: color-mix(in srgb, var(--hue, var(--primary)) 12%, var(--surface)); padding: 2px var(--s2); border-radius: var(--r-pill); }
+.qtext { font-size: 20px; font-weight: 700; line-height: 1.45; margin-top: var(--s3); outline: none; }
+.qtext .stmt { font-weight: 400; font-size: 16px; display: block; margin-top: var(--s2); }
+.opts { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s3); margin-top: var(--s5); }
+.opt { display: flex; gap: var(--s3); align-items: center; width: 100%; min-height: 56px; text-align: left; padding: var(--s3) var(--s4); background: var(--surface); color: var(--ink); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: var(--r-md); font: 600 16px/1.45 var(--font); cursor: pointer; transition: border-color var(--dur), background var(--dur); }
+.opt > .k { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border: 2px solid var(--line); border-radius: var(--r-sm); font-size: 14px; font-weight: 800; color: var(--muted); }
+.opt > .t { min-width: 0; flex: 1; overflow-x: auto; overflow-y: hidden; }
+.opt.is-sel { border-color: var(--primary); background: var(--primary-tint); }
+.opt.is-sel > .k { border-color: var(--primary); color: var(--primary); }
+.opt.is-ok { border-color: var(--ok); background: var(--ok-tint); }
+.opt.is-ok > .k { border-color: var(--ok); color: var(--ok); }
+.opt.is-bad { border-color: var(--bad); background: var(--bad-tint); }
+.opt.is-bad > .k { border-color: var(--bad); color: var(--bad); }
+.opt.is-locked { cursor: default; }
+.opt:has(input:focus-visible) { outline: 3px solid var(--primary); outline-offset: 3px; }
+@supports not selector(:has(*)) { .opt:focus-within { outline: 3px solid var(--primary); outline-offset: 3px; } }
+.num-wrap { margin-top: var(--s5); }
+.num-wrap label { font-weight: 800; display: block; }
+.num-row { display: flex; gap: var(--s2); align-items: center; margin-top: var(--s2); }
+.num-row input { flex: 1; min-width: 0; height: 56px; padding: 0 var(--s4); font: 700 20px var(--font); color: var(--ink); background: var(--surface); border: 2px solid var(--line); border-bottom-width: 4px; border-radius: var(--r-md); }
+.num-row input:focus { border-color: var(--primary); outline: none; }
+.num-row input[aria-invalid="true"] { border-color: var(--bad); }
+.field-err { color: var(--bad); font-weight: 700; font-size: 14px; margin-top: var(--s2); }
+.hint { font-size: 14px; color: var(--muted); margin-top: var(--s2); }
+.fb { margin-top: var(--s5); border-radius: var(--r-md); padding: var(--s4); border: 2px solid; }
+.fb.ok { background: var(--ok-tint); border-color: var(--ok); }
+.fb.bad { background: var(--bad-tint); border-color: var(--bad); }
+.fb h2 { font-size: 20px; font-weight: 900; display: flex; gap: var(--s2); align-items: center; }
+.fb.ok h2 { color: var(--ok); }
+.fb.bad h2 { color: var(--bad); }
+.fb .why { margin-top: var(--s2); }
+.fb .right { margin-top: var(--s2); font-weight: 700; }
+.fb details { margin-top: var(--s3); background: var(--surface); border-radius: var(--r-sm); padding: var(--s3); border: 2px solid var(--line); }
+.fb summary { cursor: pointer; font-weight: 800; }
+.steps { margin: var(--s3) 0 0; padding-left: var(--s5); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s2); }
+.steps li { padding-left: var(--s1); }
+.actionbar { position: sticky; bottom: 0; z-index: 10; margin: var(--s5) calc(-1 * var(--s4)) 0; padding: var(--s3) var(--s4) calc(var(--s3) + env(safe-area-inset-bottom)); background: var(--bg); border-top: 2px solid var(--line); }
+.boss-card { text-align: center; }
+.boss-emoji { font-size: 72px; line-height: 1; display: inline-block; }
+.boss-emoji.hit { animation: hit .45s ease; }
+@keyframes hit { 20% { transform: translateX(-8px) rotate(-6deg); } 40% { transform: translateX(8px) rotate(6deg); } 60% { transform: translateX(-4px); } 100% { transform: none; } }
+.hp { display: flex; justify-content: center; gap: var(--s1); font-size: 22px; margin-top: var(--s2); flex-wrap: wrap; }
+.scroll-stmt { text-align: left; background: var(--surface-2); border-radius: var(--r-md); padding: var(--s4); margin-top: var(--s4); }
+.scroll-stmt p + p, .scroll-stmt p + ul, .scroll-stmt ul + p { margin-top: var(--s2); }
+.scroll-stmt ul { margin: var(--s2) 0 0; padding-left: var(--s5); }
+details.stmt-mini { background: var(--surface-2); border-radius: var(--r-md); padding: var(--s3) var(--s4); margin-top: var(--s3); }
+details.stmt-mini summary { cursor: pointer; font-weight: 800; }
+.result { text-align: center; }
+.result .big { font-size: 64px; line-height: 1; }
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); margin-top: var(--s4); }
+.kpi { background: var(--surface-2); border-radius: var(--r-md); padding: var(--s3); }
+.kpi b { display: block; font-size: 24px; font-weight: 900; }
+.missed { text-align: left; margin: var(--s3) 0 0; padding-left: var(--s5); }
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 60; }
+.confetti span { position: absolute; top: -40px; font-size: 26px; animation: fall 1.6s ease-in forwards; }
+@keyframes fall { to { transform: translateY(110vh) rotate(320deg); opacity: .3; } }
+dialog { border: 2px solid var(--line); border-radius: var(--r-md); background: var(--surface); color: var(--ink); padding: var(--s5); max-width: min(440px, calc(100vw - 32px)); }
+dialog::backdrop { background: rgba(10, 8, 20, .55); }
+dialog h2 { font-size: 20px; font-weight: 900; }
+dialog p { margin-top: var(--s2); }
+dialog .btn-row { margin-top: var(--s5); }
+footer.foot { max-width: 760px; margin: 0 auto; padding: 0 var(--s4) var(--s7); font-size: 14px; color: var(--muted); }
+footer.foot p + p { margin-top: var(--s2); }
+@media (min-width: 640px) {
+  main { padding-top: var(--s6); }
+  .card { padding: var(--s5); }
+  .hero h1 { font-size: 48px; }
+  .actionbar { margin-left: 0; margin-right: 0; border-radius: var(--r-md) var(--r-md) 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash { display: none; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+</style>
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']], processEscapes: true },
+    options: { enableMenu: false },
+    chtml: { scale: 1, matchFontHeight: true },
+    startup: {
+      typeset: false,
+      ready: function () {
+        MathJax.startup.defaultReady();
+        MathJax.startup.promise.then(function () {
+          window.__mjReady = true;
+          document.dispatchEvent(new Event('mj-ready'));
+        });
+      }
+    }
+  };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js" onerror="window.__mjFail = true; document.documentElement.classList.add('no-mathjax');"></script>
+</head>
+<body>
+<a class="skip" href="#app">Saltar al contenido</a>
+<div class="splash" aria-hidden="true"><div class="splash-in"><span class="splash-emoji">🏛️</span><span class="splash-title">Palacio Estadístico</span></div></div>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="#/" aria-label="Palacio Estadístico: volver al mapa"><span class="brand-mark" aria-hidden="true">🏛️</span><span class="brand-name">Palacio<span class="bn-long"> Estadístico</span></span></a>
+    <span class="stat stat-xp" title="Puntos de experiencia"><span aria-hidden="true">⭐</span><span id="xp">0</span><span class="sr-only"> puntos de experiencia</span></span>
+    <span class="stat stat-fire" title="Respuestas correctas seguidas"><span aria-hidden="true">🔥</span><span id="streak">0</span><span class="sr-only"> correctas seguidas</span></span>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="Cambiar a tema oscuro">🌙</button>
+  </div>
+</header>
+<main id="app" tabindex="-1"></main>
+<footer class="foot" id="foot">
+  <p class="mj-note">Las fórmulas se ven en texto LaTeX porque no cargó MathJax (hace falta conexión a internet la primera vez).</p>
+  <p>Ejercicios: Parcial AEII 1C 2026 (Temas 1, 2 y B), Prácticas 1 a 5, Ejercicios de Estimadores y de FGM y Ejercitación de potencia del test. Cátedra Tito Lasanta, FCE-UBA. Las soluciones se verificaron numéricamente; si algo no coincide con lo que da la cátedra, gana la cátedra.</p>
+  <p>Tu progreso se guarda solo en este navegador (sin cuentas, sin cookies, sin analítica). Lo podés borrar desde el mapa.</p>
+</footer>
+<dialog id="dlg" aria-labelledby="dlgTitle"><h2 id="dlgTitle"></h2><p id="dlgText"></p><div class="btn-row"><button class="btn btn-ghost" type="button" id="dlgNo">Volver</button><button class="btn" type="button" id="dlgYes">Aceptar</button></div></dialog>
+<div id="live" class="sr-only" aria-live="polite"></div>
+
+<script>
+/* ============ CONTENIDO: salas, preguntas y jefes ============ */
+window.PALACIO = { levels: [] };
+const R = String.raw;
+/* Formato de cada pregunta:
+   mc  -> opts[0] es SIEMPRE la correcta (el motor mezcla el orden en pantalla).
+   num -> ans (valor) y tol (tolerancia absoluta). */
+PALACIO.levels.push({
+  id: 1, emoji: '🪞', name: 'Salón de los Espejos',
+  topic: 'Estimadores: sesgo, varianza, consistencia, eficiencia y Cramér-Rao',
+  scene: {
+    donde: R`Entrás a un salón largo con espejos en las dos paredes. Al fondo, enfrente tuyo, hay un blanco de tiro con un punto dorado en el centro.`,
+    ves: R`A tu izquierda, una fila de tiradores dispara al blanco, uno por vez. A tu derecha, en una tarima, tres jueces anotan. La <b>Jueza del Centro</b> marca dónde cae el promedio de todos los impactos de cada tirador. El <b>Juez del Racimo</b> mide qué tan desparramados quedan. El <b>Juez del Reloj</b> le da a cada tirador cada vez más balas y mira si el racimo se cierra sobre el punto dorado. En el piso, frente al blanco, hay un círculo de tiza que nadie puede achicar.`,
+    trata: R`Punto dorado = el parámetro \(\theta\). Tirador = estimador \(\hat\theta\). Promedio de impactos en el centro = <b>insesgado</b>, \(E(\hat\theta)=\theta\). Racimo apretado = <b>varianza chica</b>. Con más balas el racimo se cierra sobre el centro = <b>consistente</b>. Círculo de tiza = <b>cota de Cramér-Rao</b>, la menor varianza posible para un insesgado; el tirador que la toca es <b>eficiente</b>.`
+  },
+  keys: [
+    R`Sesgo: \(B(\hat\theta)=E(\hat\theta)-\theta\). Insesgado si \(B=0\).`,
+    R`Error cuadrático medio: \(ECM(\hat\theta)=V(\hat\theta)+B(\hat\theta)^2\).`,
+    R`Consistente (condición suficiente): \(\lim_{n\to\infty}E(\hat\theta)=\theta\) y \(\lim_{n\to\infty}V(\hat\theta)=0\).`,
+    R`Eficiencia de \(\hat\theta_A\) frente a \(\hat\theta_B\): \(\dfrac{V(\hat\theta_B)}{V(\hat\theta_A)}\). Si da más que 1, \(\hat\theta_A\) es más eficiente.`,
+    R`Cota de Cramér-Rao: \(V(\hat\theta)\ge \dfrac{1}{n\,E\left[\left(\frac{\partial \ln f(X;\theta)}{\partial \theta}\right)^2\right]}\).`,
+    R`Máxima verosimilitud: \(\hat\theta_{MV}\) maximiza \(\ln L(\theta)=\sum_{i=1}^{n}\ln f(x_i;\theta)\).`
+  ],
+  questions: [
+    { id: '1-1', type: 'mc', src: 'Concepto',
+      q: R`La Jueza del Centro levanta la bandera verde cuando el promedio de todos los impactos de un tirador cae justo en el punto dorado. ¿Qué propiedad está premiando?`,
+      opts: [R`Insesgadez: \(E(\hat\theta)=\theta\)`, R`Consistencia: \(\hat\theta\to\theta\) cuando \(n\to\infty\)`, R`Eficiencia: la menor varianza posible`, R`Que la varianza sea cero`],
+      why: R`El promedio de los impactos es la esperanza del estimador. Si cae en el punto dorado, el tirador no tiene un desvío sistemático: es insesgado, aunque cada tiro suelto pueda errar.`,
+      steps: [R`Sesgo: \(B(\hat\theta)=E(\hat\theta)-\theta\).`, R`Insesgado \(\iff B(\hat\theta)=0 \iff E(\hat\theta)=\theta\).`, R`Que el racimo esté apretado (varianza) es otra cosa: lo mide el Juez del Racimo.`] },
+    { id: '1-2', type: 'mc', src: 'Ejercicios Estimadores · ej. 5a',
+      ctx: R`Sea \(y\) con \(f(y)=\frac{1}{\theta}e^{-\frac{y}{\theta}}\), \(\theta \wedge y>0\) (0 en otro caso). Considere \[\hat\theta_1=y_1,\quad \hat\theta_2=\frac{y_1+y_2}{2},\quad \hat\theta_3=\frac{y_1+2y_2}{2},\quad \hat\theta_4=\bar y\]`,
+      q: R`a. ¿Qué estimadores son insesgados?`,
+      opts: [R`\(\hat\theta_1\), \(\hat\theta_2\) y \(\hat\theta_4\)`, R`Solo \(\hat\theta_4\)`, R`Los cuatro`, R`\(\hat\theta_2\), \(\hat\theta_3\) y \(\hat\theta_4\)`],
+      why: R`Todos disparan con observaciones de esperanza \(\theta\). El tercero suma pesos \(1+2=3\) pero divide por 2: su promedio cae en \(\tfrac32\theta\), corrido del punto dorado.`,
+      steps: [R`Exponencial de media \(\theta\): \(E(y)=\theta\), \(V(y)=\theta^2\).`, R`\(E(\hat\theta_1)=\theta\); \(E(\hat\theta_2)=\frac{\theta+\theta}{2}=\theta\).`, R`\(E(\hat\theta_3)=\frac{\theta+2\theta}{2}=\frac{3}{2}\theta\neq\theta\): sesgado.`, R`\(E(\hat\theta_4)=E(\bar y)=\theta\).`] },
+    { id: '1-3', type: 'mc', src: 'Ejercicios Estimadores · ej. 5c',
+      ctx: R`Mismos estimadores: \(\hat\theta_1=y_1,\ \hat\theta_2=\frac{y_1+y_2}{2},\ \hat\theta_3=\frac{y_1+2y_2}{2},\ \hat\theta_4=\bar y\), con \(y\) exponencial de media \(\theta\).`,
+      q: R`c. Compruebe consistencia de cada estimador. ¿Cuál es consistente?`,
+      opts: [R`Solo \(\hat\theta_4=\bar y\)`, R`\(\hat\theta_2\) y \(\hat\theta_4\)`, R`Todos los insesgados`, R`Ninguno`],
+      why: R`El Juez del Reloj le da más balas a cada tirador. Los tres primeros siguen disparando con una o dos observaciones: su racimo no se achica nunca. Solo \(\bar y\) usa todas las balas y su varianza \(\theta^2/n\) se va a cero.`,
+      steps: [R`\(V(\hat\theta_1)=\theta^2\), \(V(\hat\theta_2)=\frac{\theta^2}{2}\), \(V(\hat\theta_3)=\frac{\theta^2+4\theta^2}{4}=\frac{5}{4}\theta^2\): ninguna depende de \(n\).`, R`\(V(\hat\theta_4)=\frac{\theta^2}{n}\to 0\) cuando \(n\to\infty\), y es insesgado: consistente.`, R`\(\hat\theta_3\) además es sesgado.`] },
+    { id: '1-4', type: 'mc', src: 'Práctica 2 · ej. 3',
+      ctx: R`Sea \((X_1\,X_2\,X_3\,X_4)\) una muestra aleatoria proveniente de una población con distribución de Poisson con parámetro \(\lambda\). Considere los siguientes estadísticos de \(\lambda\): \[\hat\lambda_1=\frac{X_1+X_2+X_3+X_4}{4}\qquad \hat\lambda_2=\frac{X_1+2.X_2+3.X_3+4.X_4}{10}\]`,
+      q: R`Verifique si son insesgados. ¿Cuál es más eficiente? ¿Por qué?`,
+      opts: [R`Los dos son insesgados y \(\hat\lambda_1\) es más eficiente: \(V=0{,}25\lambda\) contra \(0{,}30\lambda\)`, R`Los dos son insesgados y \(\hat\lambda_2\) es más eficiente, porque pondera más las últimas`, R`Solo \(\hat\lambda_1\) es insesgado`, R`Los dos son insesgados y tienen la misma varianza`],
+      why: R`Los dos tiradores apuntan al centro (sus pesos suman 1), pero el segundo carga casi todo el peso en pocas balas y su racimo queda más ancho. Repartir el peso por igual da la menor varianza.`,
+      steps: [R`\(E(\hat\lambda_2)=\frac{(1+2+3+4)\lambda}{10}=\lambda\): insesgado, igual que \(\hat\lambda_1\).`, R`\(V(\hat\lambda_1)=\frac{4\lambda}{16}=0{,}25\lambda\).`, R`\(V(\hat\lambda_2)=\frac{(1+4+9+16)\lambda}{100}=0{,}30\lambda\).`, R`Eficiencia de \(\hat\lambda_1\) frente a \(\hat\lambda_2\): \(\frac{0{,}30\lambda}{0{,}25\lambda}=1{,}2>1\), así que \(\hat\lambda_1\) es más eficiente.`] },
+    { id: '1-5', type: 'num', src: 'Práctica 2 · ej. 8',
+      ctx: R`Considere una población con distribución Gamma de parámetros \(\alpha\)=6000 y \(\beta\) = 2. Un estimador de \(\beta\) basado en una muestra de tamaño 10 indica que \(E(\hat\beta)\) = 2.2 y EMC(\(\hat\beta\)) = 1 .`,
+      q: R`Determine Var(\(\hat\beta\)).`, ans: 0.96, tol: 0.001,
+      why: R`El error cuadrático medio es el error total del tirador: lo desparramado del racimo más lo corrido que está del centro, al cuadrado.`,
+      steps: [R`Sesgo: \(B=E(\hat\beta)-\beta=2{,}2-2=0{,}2\).`, R`\(ECM=V+B^2\Rightarrow V=1-0{,}2^2=1-0{,}04=0{,}96\).`] },
+    { id: '1-6', type: 'mc', src: 'Parcial 1C 2026 · Tema 2 · ej. 3a',
+      ctx: R`Sabiendo que la cantidad de personas que asiste a un recital, X, se distribuye normalmente, sus colaboradores proponen los siguientes estimadores para la media de asistentes: \[\hat\mu_1=\frac{n-1}{n}\sum_{i=1}^{n}X_i\qquad \hat\mu_2=\frac{X_1X_2}{n}+\frac{\sum_{i=3}^{n}X_i}{n-2}\]`,
+      q: R`Decida, con sus conocimientos de Sesgadez, Varianza, y Consistencia cual es mejor.`,
+      opts: [R`\(\hat\mu_2\): es sesgado, pero su sesgo \(\mu^2/n\) y su varianza se van a 0; es consistente`, R`\(\hat\mu_1\): es insesgado porque usa todas las observaciones`, R`\(\hat\mu_1\): su sesgo se va a 0 cuando \(n\) crece`, R`Ninguno de los dos es consistente`],
+      why: R`Leé bien a \(\hat\mu_1\): es \(\frac{n-1}{n}\) por la <b>suma</b>, no por la media. Ese tirador apunta a \((n-1)\mu\): cuantas más balas, más lejos del punto dorado. \(\hat\mu_2\) arranca corrido por el \(X_1X_2/n\), pero ese desvío se borra con \(n\) y el racimo se cierra.`,
+      steps: [R`\(E(\hat\mu_1)=\frac{n-1}{n}\cdot n\mu=(n-1)\mu\): sesgo \((n-2)\mu\), que crece con \(n\). No es consistente.`, R`\(E(\hat\mu_2)=\frac{E(X_1)E(X_2)}{n}+\frac{(n-2)\mu}{n-2}=\frac{\mu^2}{n}+\mu\): sesgo \(\frac{\mu^2}{n}\to0\).`, R`\(V(\hat\mu_2)=\frac{V(X_1X_2)}{n^2}+\frac{\sigma^2}{n-2}\to0\), con \(V(X_1X_2)=\sigma^4+2\sigma^2\mu^2\) finita.`, R`Sesgo y varianza tienden a 0: \(\hat\mu_2\) es consistente y es el mejor de los dos.`] },
+    { id: '1-7', type: 'mc', src: 'Práctica 2 · ej. 24c',
+      ctx: R`Sean \(X_1\,X_2\ldots X_n\) una muestra aleatoria proveniente de una población con una distribución \(f(y)=(1/\theta).e^{(-y/\theta)}\), \(y>0\). Se usa la media muestral para estimar \(\theta\).`,
+      q: R`c.- Determine si es un estimador insesgado de mínima varianza. ¿Qué dice la cota de Cramér-Rao?`,
+      opts: [R`\(CCR=\frac{\theta^2}{n}\) y \(V(\bar X)=\frac{\theta^2}{n}\): la alcanza, es eficiente`, R`\(CCR=\frac{\theta}{n}\), menor que \(V(\bar X)\): no es eficiente`, R`\(CCR=\frac{1}{n\theta^2}\) y \(\bar X\) no la alcanza`, R`La cota no se puede calcular para la exponencial`],
+      why: R`El círculo de tiza de este blanco mide \(\theta^2/n\) y el racimo de \(\bar X\) mide exactamente eso: toca la tiza. Es insesgado y ningún insesgado puede agrupar más apretado.`,
+      steps: [R`\(\ln f(y;\theta)=-\ln\theta-\frac{y}{\theta}\Rightarrow \frac{\partial \ln f}{\partial\theta}=-\frac{1}{\theta}+\frac{y}{\theta^2}=\frac{y-\theta}{\theta^2}\).`, R`\(E\left[\left(\frac{y-\theta}{\theta^2}\right)^2\right]=\frac{V(y)}{\theta^4}=\frac{\theta^2}{\theta^4}=\frac{1}{\theta^2}\).`, R`\(CCR=\frac{1}{n\cdot\frac{1}{\theta^2}}=\frac{\theta^2}{n}\).`, R`\(V(\bar X)=\frac{\theta^2}{n}=CCR\): insesgado de mínima varianza (eficiente).`] },
+    { id: '1-8', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 3b',
+      ctx: R`Sea \(X_1, X_2, \ldots, X_n\) una muestra aleatoria (\(n\ge 2\) de una poblacion con distribucion Poisson de parametro \(\lambda\). Se proponen los siguientes estimadores: \[\hat\lambda=\frac{2}{3(n-1)}\sum_{i=1}^{n-1}X_i+\frac{X_n}{3}\qquad \hat\lambda=\frac{1}{(n+2)}\sum_{i=1}^{n}X_i\qquad \hat\lambda=\bar\lambda\]`,
+      q: R`b) Determinar la consistencia de cada estimador. ¿Cuáles son consistentes?`,
+      opts: [R`El segundo y el tercero`, R`Solo el tercero (\(\bar X\))`, R`Los tres`, R`El primero y el tercero`],
+      why: R`El primer tirador le da un tercio del peso a una sola bala (\(X_n\)): por más balas que le des, ese tercio no se promedia y el racimo nunca baja de \(\lambda/9\). El segundo arranca un poco corrido, pero su sesgo y su varianza se van a cero.`,
+      steps: [R`1°: \(E=\frac{2(n-1)\lambda}{3(n-1)}+\frac{\lambda}{3}=\lambda\); \(V=\frac{4\lambda}{9(n-1)}+\frac{\lambda}{9}\to\frac{\lambda}{9}\neq0\): no es consistente.`, R`2°: \(E=\frac{n\lambda}{n+2}\to\lambda\); \(V=\frac{n\lambda}{(n+2)^2}\to0\): consistente (asintóticamente insesgado).`, R`3°: \(E(\bar X)=\lambda\); \(V=\frac{\lambda}{n}\to0\): consistente.`] }
+  ],
+  boss: {
+    name: 'El Hechicero de los Espejos', emoji: '🧙', source: 'Parcial 1C 2026 · Tema 1 · Ejercicio 3',
+    statement: R`<p>3) Es un asesor estadístico para una empresa fabricante de termos. Para fabricar la tapa dichos termos, la empresa tiene una maquina especializada. Los dueños se dan cuenta que la maquina tiene X fallos en un día. Para corroborar su teoría tiene que armar un estadístico que mida la cantidad de eventos (fallos) que tiene la maquina en un día para así poder compararla con otras del mercado y ver si la cantidad de fallos es normal para el modelo de la maquina o necesita reparla. Como sabe, la distribución que mide una población de las características de X es Poisson, y su parámetro es \(\lambda\).</p>
+<p>a) Para lidiar con este problema se le presentan los siguientes 2 estimadores: (5%)</p>
+\[\hat\lambda_1=\frac{1}{2}X_1+\frac{\sum_{i=2}^{n}X_i}{2n-2}\qquad \hat\lambda_2=\frac{\sum_{i=1}^{n}X_i}{n-1}\]
+<p>Decida, con sus conocimientos de Sesgadez, Varianza, y Consistencia cual es mejor.</p>
+<p>b) Sin embargo, conoce herramientas para obtener un estimador mas verosímil y de menor varianza que los anteriores. Encuéntrelo y explique brevemente porque es mejor. (10%)</p>`,
+    steps: [
+      { id: '1-B1', type: 'mc', q: R`a) Primer golpe: ¿cuál de los dos es insesgado?`,
+        opts: [R`Solo \(\hat\lambda_1\)`, R`Solo \(\hat\lambda_2\)`, R`Los dos`, R`Ninguno`],
+        why: R`\(\hat\lambda_1\) pone la mitad del peso en \(X_1\) y reparte la otra mitad entre las \(n-1\) restantes: su promedio cae justo en \(\lambda\). \(\hat\lambda_2\) suma \(n\) balas pero divide por \(n-1\): se pasa un poquito.`,
+        steps: [R`\(E(\hat\lambda_1)=\frac{\lambda}{2}+\frac{(n-1)\lambda}{2n-2}=\frac{\lambda}{2}+\frac{\lambda}{2}=\lambda\): insesgado.`, R`\(E(\hat\lambda_2)=\frac{n\lambda}{n-1}\): sesgo \(\frac{\lambda}{n-1}\), que tiende a 0 (asintóticamente insesgado).`] },
+      { id: '1-B2', type: 'mc', q: R`Segundo golpe: ¿y la consistencia?`,
+        opts: [R`\(\hat\lambda_2\) es consistente y \(\hat\lambda_1\) no`, R`\(\hat\lambda_1\) es consistente y \(\hat\lambda_2\) no`, R`Los dos son consistentes`, R`Ninguno es consistente`],
+        why: R`El Juez del Reloj agrega balas: el racimo de \(\hat\lambda_1\) nunca baja de \(\lambda/4\), porque la mitad del peso sigue en \(X_1\). El de \(\hat\lambda_2\) se cierra sobre el centro.`,
+        steps: [R`\(V(\hat\lambda_1)=\frac{\lambda}{4}+\frac{(n-1)\lambda}{(2n-2)^2}=\frac{\lambda}{4}+\frac{\lambda}{4(n-1)}\to\frac{\lambda}{4}\neq0\): no es consistente.`, R`\(V(\hat\lambda_2)=\frac{n\lambda}{(n-1)^2}\to0\) y su sesgo \(\to0\): consistente.`] },
+      { id: '1-B3', type: 'mc', q: R`Tercer golpe: con sesgadez, varianza y consistencia, ¿cuál es mejor?`,
+        opts: [R`\(\hat\lambda_2\): su sesgo y su varianza se van a 0, y con \(n\) grande su ECM es mucho menor`, R`\(\hat\lambda_1\): ser insesgado alcanza para ganar`, R`\(\hat\lambda_1\): tiene menor varianza para todo \(n\)`, R`Son equivalentes`],
+        why: R`Un tirador centrado cuyo racimo nunca se cierra pierde contra uno apenas corrido que, con más balas, clava el centro. Para comparar un sesgado con un insesgado se usa el ECM.`,
+        steps: [R`\(ECM(\hat\lambda_1)=V(\hat\lambda_1)\to\frac{\lambda}{4}\).`, R`\(ECM(\hat\lambda_2)=\frac{n\lambda}{(n-1)^2}+\frac{\lambda^2}{(n-1)^2}\to0\).`, R`Ejemplo con \(n=10\) y \(\lambda=2\): \(ECM(\hat\lambda_1)=0{,}556\) y \(ECM(\hat\lambda_2)=0{,}296\).`] },
+      { id: '1-B4', type: 'mc', q: R`b) ¿Cuál es el estimador más verosímil (máxima verosimilitud) de \(\lambda\)?`,
+        opts: [R`\(\hat\lambda_{MV}=\bar X=\frac{\sum_{i=1}^{n}X_i}{n}\)`, R`\(\hat\lambda_{MV}=\frac{\sum_{i=1}^{n}X_i}{n-1}\)`, R`\(\hat\lambda_{MV}=\frac{1}{\bar X}\)`, R`\(\hat\lambda_{MV}=\max(X_i)\)`],
+        why: R`El hechicero esconde el truco en la verosimilitud: derivás \(\ln L\), igualás a 0 y aparece la media muestral.`,
+        steps: [R`\(L(\lambda)=\prod_{i=1}^{n}\frac{e^{-\lambda}\lambda^{x_i}}{x_i!}\).`, R`\(\ln L=-n\lambda+\ln\lambda\sum x_i-\sum\ln(x_i!)\).`, R`\(\frac{d\ln L}{d\lambda}=-n+\frac{\sum x_i}{\lambda}=0\Rightarrow\hat\lambda=\bar x\).`] },
+      { id: '1-B5', type: 'mc', q: R`Golpe final: ¿por qué \(\bar X\) es mejor que los dos anteriores?`,
+        opts: [R`Es insesgado, consistente y su varianza \(\lambda/n\) iguala la cota de Cramér-Rao: ningún insesgado tiene menos`, R`Porque su varianza es 0`, R`Porque tiene menos sesgo que \(\hat\lambda_1\)`, R`Porque su varianza es \(\lambda/(n-1)\), menor que \(\lambda/n\)`],
+        why: R`\(\bar X\) toca el círculo de tiza: es el tirador eficiente del salón.`,
+        steps: [R`\(\frac{\partial\ln f}{\partial\lambda}=-1+\frac{x}{\lambda}\Rightarrow E\left[\left(\frac{x-\lambda}{\lambda}\right)^2\right]=\frac{V(x)}{\lambda^2}=\frac{1}{\lambda}\).`, R`\(CCR=\frac{1}{n\cdot\frac{1}{\lambda}}=\frac{\lambda}{n}\).`, R`\(V(\bar X)=\frac{\lambda}{n}=CCR\): insesgado, consistente y de mínima varianza.`] }
+    ]
+  }
+});
+
+PALACIO.levels.push({
+  id: 2, emoji: '⚙️', name: 'Fábrica de Momentos',
+  topic: 'Función generatriz de momentos (FGM) y función cumulante',
+  scene: {
+    donde: R`Bajás por una escalera de hierro a un sótano con olor a aceite. En el centro hay una máquina de bronce: una tolva arriba, una manivela a la derecha y una ventanita con un contador al frente. El dial de la ventanita está trabado en \(t=0\).`,
+    ves: R`Echás una variable \(X\) por la tolva. Cada vuelta de manivela es una derivada: con 1 vuelta la ventanita muestra \(E(X)\); con 2, \(E(X^2)\). A la izquierda hay una palanca roja con el cartel <b>ln</b>: si la bajás, la máquina pasa a ser la cumulante y con 2 vueltas la ventanita ya muestra la varianza. En la puerta de salida, un sello estampa \(e^{bt}\) a todo lo que salió con "+ b", y un engranaje multiplica \(t\) por \(a\) cuando la variable venía "por a". Cuando dos cintas con variables independientes se juntan, sus FGM se multiplican.`,
+    trata: R`Tolva = \(\varphi_X(t)=E(e^{tX})\). Vuelta de manivela = derivar respecto de \(t\). Dial en 0 = evaluar en \(t=0\): \(\varphi^{(k)}(0)=E(X^k)\). Palanca ln = \(K(t)=\ln\varphi(t)\), con \(K'(0)=E(X)\) y \(K''(0)=V(X)\). Sello y engranaje = \(\varphi_{aX+b}(t)=e^{bt}\varphi_X(at)\). Cintas que se juntan = \(\varphi_{X+Y}=\varphi_X\,\varphi_Y\) si son independientes.`
+  },
+  keys: [
+    R`\(\varphi_X(t)=E(e^{tX})\); \(\left.\frac{d^k\varphi_X}{dt^k}\right|_{t=0}=E(X^k)\).`,
+    R`\(K_X(t)=\ln\varphi_X(t)\): \(K'(0)=E(X)\), \(K''(0)=V(X)\).`,
+    R`\(\varphi_{aX+b}(t)=e^{bt}\varphi_X(at)\); \(\varphi_{X+Y}(t)=\varphi_X(t)\,\varphi_Y(t)\) si son independientes.`,
+    R`Binomial\((n;p)\): \((q+pe^t)^n\). Poisson\((\lambda)\): \(e^{\lambda(e^t-1)}\). Geométrica (desde \(x=1\)): \(\frac{pe^t}{1-qe^t}\).`,
+    R`Normal\((\mu;\sigma^2)\): \(e^{\mu t+\frac{\sigma^2t^2}{2}}\). Gamma\((\alpha;\beta)\): \((1-\beta t)^{-\alpha}\). Exponencial\((\beta)\): \((1-\beta t)^{-1}\). \(\chi^2_n\): \((1-2t)^{-n/2}\).`
+  ],
+  questions: [
+    { id: '2-1', type: 'mc', src: 'Concepto',
+      q: R`Echás \(X\) en la máquina, das 2 vueltas de manivela y mirás la ventanita trabada en \(t=0\), sin bajar la palanca ln. ¿Qué número ves?`,
+      opts: [R`\(E(X^2)\)`, R`\(V(X)\)`, R`\(E(X)^2\)`, R`\(\varphi_X(2)\)`],
+      why: R`Sin la palanca ln, cada vuelta baja una potencia del desarrollo de \(e^{tX}\): la segunda vuelta deja \(E(X^2)\). Para ver la varianza directa hay que bajar la palanca ln (cumulante).`,
+      steps: [R`\(\varphi_X(t)=E\left(1+tX+\frac{t^2X^2}{2!}+\frac{t^3X^3}{3!}+\cdots\right)\).`, R`\(\varphi''_X(t)=E(X^2)+t\,E(X^3)+\cdots\Rightarrow\varphi''_X(0)=E(X^2)\).`, R`La varianza sale de \(V(X)=E(X^2)-E(X)^2\) o de \(K''(0)\).`] },
+    { id: '2-2', type: 'mc', src: 'Práctica 3 · ej. 2a',
+      ctx: R`Indique a qué distribución corresponden las siguientes funciones generatrices de momentos:`,
+      q: R`a.- \(\varphi_x(t)=\left(\frac{2}{5}+\frac{3}{5}.e^t\right)^{25}\)`,
+      opts: [R`Binomial con \(n=25\) y \(p=\frac35\): \(E=15\), \(V=6\)`, R`Binomial con \(n=25\) y \(p=\frac25\): \(E=10\), \(V=6\)`, R`Poisson con \(\lambda=25\)`, R`Geométrica con \(p=\frac35\)`],
+      why: R`La forma \((q+pe^t)^n\) es la firma de la binomial: \(p\) es el que acompaña a \(e^t\). Dato curioso: \(E=15\) y \(V=6\) son justo los datos del ej. 1 del Tema 1.`,
+      steps: [R`\((q+pe^t)^n\) con \(q=\frac25\), \(p=\frac35\) y \(n=25\).`, R`\(E=np=25\cdot\frac35=15\); \(V=npq=15\cdot\frac25=6\).`] },
+    { id: '2-3', type: 'mc', src: 'Práctica 3 · ej. 2c',
+      q: R`c.- \(\varphi_x(t)=e^{10t+32t^2}\)`,
+      opts: [R`Normal con \(\mu=10\) y \(\sigma^2=64\)`, R`Normal con \(\mu=10\) y \(\sigma^2=32\)`, R`Poisson con \(\lambda=10\)`, R`Normal con \(\mu=10\) y \(\sigma=32\)`],
+      why: R`La normal es la colina suave: un exponente con \(t\) y \(t^2\). El coeficiente de \(t^2\) es \(\sigma^2/2\), así que hay que duplicarlo.`,
+      steps: [R`\(e^{\mu t+\frac{\sigma^2t^2}{2}}\Rightarrow \mu=10\) y \(\frac{\sigma^2}{2}=32\).`, R`\(\sigma^2=64\) y \(\sigma=8\).`] },
+    { id: '2-4', type: 'mc', src: 'Práctica 3 · ej. 2d',
+      q: R`d.- \(\varphi_x(t)=(1-2t)^{-5}\)`,
+      opts: [R`\(\chi^2\) con 10 grados de libertad (Gamma con \(\alpha=5,\ \beta=2\))`, R`\(\chi^2\) con 5 grados de libertad`, R`Exponencial con \(\beta=2\)`, R`Gamma con \(\alpha=2,\ \beta=5\)`],
+      why: R`\((1-\beta t)^{-\alpha}\) es la Gamma. Con \(\beta=2\) es una chi-cuadrado de \(2\alpha\) grados de libertad, porque \(\chi^2_n\) tiene FGM \((1-2t)^{-n/2}\).`,
+      steps: [R`\((1-2t)^{-n/2}=(1-2t)^{-5}\Rightarrow \frac{n}{2}=5\Rightarrow n=10\).`, R`\(E=n=10\) y \(V=2n=20\).`] },
+    { id: '2-5', type: 'mc', src: 'Práctica 3 · ej. 3b',
+      ctx: R`Sea la variable aleatoria \(Z = 3X + 2\). Determine la FGM de Z en los siguientes casos:`,
+      q: R`b.- \(X\sim\) Poisson \(\lambda = 3\)`,
+      opts: [R`\(\varphi_Z(t)=e^{2t}\,e^{3(e^{3t}-1)}\)`, R`\(\varphi_Z(t)=e^{3t}\,e^{2(e^{t}-1)}\)`, R`\(\varphi_Z(t)=3\,e^{3(e^{t}-1)}+2\)`, R`\(\varphi_Z(t)=e^{2t}\,e^{9(e^{t}-1)}\)`],
+      why: R`Sello y engranaje: el "+2" sale como \(e^{2t}\) y el "por 3" mete \(3t\) adentro de la FGM de la Poisson.`,
+      steps: [R`\(\varphi_{3X+2}(t)=e^{2t}\varphi_X(3t)\).`, R`\(\varphi_X(s)=e^{3(e^{s}-1)}\Rightarrow\varphi_X(3t)=e^{3(e^{3t}-1)}\).`, R`De ahí: \(E(Z)=3\cdot3+2=11\) y \(V(Z)=9\cdot3=27\).`] },
+    { id: '2-6', type: 'num', src: 'Práctica 3 · ej. 4c',
+      ctx: R`Dadas las variables aleatorias \(X_1\sim N(2;4)\) y \(X_2\sim N(3;9)\) independientes y dada: \[W=\frac{2.X_1+3.X_2}{2}\] Halle, aplicando propiedades de la FGM:`,
+      q: R`c.- VAR(W)`, ans: 24.25, tol: 0.01,
+      why: R`\(W=X_1+1{,}5X_2\): dos cintas que se juntan (se multiplican las FGM) y un engranaje de 1,5 en la segunda.`,
+      steps: [R`\(\varphi_W(t)=\varphi_{X_1}(t)\,\varphi_{X_2}(1{,}5t)=e^{2t+2t^2}\cdot e^{4{,}5t+\frac{9\cdot(1{,}5t)^2}{2}}\).`, R`\(\varphi_W(t)=e^{6{,}5t+12{,}125t^2}\Rightarrow\frac{\sigma_W^2}{2}=12{,}125\).`, R`\(V(W)=24{,}25\) (y \(E(W)=6{,}5\)).`] },
+    { id: '2-7', type: 'mc', src: 'Ejercicios FGM · ej. 6a',
+      ctx: R`Considere las siguientes derivadas de funciones generadoras de cumulantes (\(\kappa=ln(m_w(t))\)): \[\frac{\partial^0\kappa}{\partial t^0}=-2ln(1-4t)+8(e^{3t}-1),\quad w=2x+3y\]`,
+      q: R`a. Identifique la distribución de \(x\) e \(y\)`,
+      opts: [R`\(x\sim\chi^2_4\) (Gamma con \(\alpha=2,\ \beta=2\)) e \(y\sim\) Poisson\((8)\)`, R`\(x\sim\) Gamma\((2;4)\) e \(y\sim\) Poisson\((24)\)`, R`\(x\sim\) Exponencial\((4)\) e \(y\sim\) Poisson\((8/3)\)`, R`\(x\sim\chi^2_2\) e \(y\sim\) Binomial\((8;3)\)`],
+      why: R`Con la palanca ln bajada, los productos se vuelven sumas. Cada sumando es una cinta: el engranaje de \(x\) es 2 y el de \(y\) es 3, así que hay que sacarlos de adentro antes de leer la firma.`,
+      steps: [R`\(\kappa_w(t)=\kappa_x(2t)+\kappa_y(3t)\).`, R`\(-2\ln(1-4t)=-2\ln(1-2\cdot 2t)\Rightarrow\kappa_x(s)=-2\ln(1-2s)\Rightarrow\varphi_x(s)=(1-2s)^{-2}\): Gamma\((2;2)=\chi^2_4\).`, R`\(8(e^{3t}-1)=\kappa_y(3t)\) con \(\kappa_y(s)=8(e^{s}-1)\): Poisson con \(\lambda=8\).`] },
+    { id: '2-8', type: 'num', src: 'Ejercicios FGM · ej. 6b',
+      ctx: R`Mismo caso: \(\kappa_w(t)=-2ln(1-4t)+8(e^{3t}-1)\), con \(w=2x+3y\).`,
+      q: R`b. Calcule \(V(w)\)`, ans: 104, tol: 0.01,
+      why: R`Los engranajes salen al cuadrado: \(V(2x+3y)=4V(x)+9V(y)\), con \(x\) e \(y\) independientes.`,
+      steps: [R`\(V(x)=2\cdot4=8\) (\(\chi^2_4\)); \(V(y)=8\) (Poisson).`, R`\(V(w)=4\cdot8+9\cdot8=32+72=104\).`, R`De paso: \(E(w)=2\cdot4+3\cdot8=32\).`] },
+    { id: '2-9', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 1a',
+      ctx: R`1. Sabiendo que \(w=f(x,y)\) y que \(\phi_w(t)=e^{-\lambda(e^t-1)}\frac{pe^{8t}}{1/qe^{8t}}e^{3t}\)<br>a) Defina \(f(x,y)\) y las distribuciones de \(x\) e \(y\) (5%)`,
+      q: R`Leé la FGM por partes. ¿Qué te dicen el factor con \(pe^{8t}\) y el \(e^{3t}\)?`,
+      opts: [R`Una geométrica evaluada en \(8t\) (o sea \(8y\), con \(y\) geométrica) y una constante \(+3\)`, R`Una binomial de 8 ensayos y una constante que multiplica por 3`, R`Una geométrica de parámetro \(p=8\) y una normal`, R`Una Poisson de media 8 y una exponencial de media 3`],
+      why: R`El sello \(e^{3t}\) delata un "+3". La fracción \(\frac{pe^{s}}{1-qe^{s}}\) es la firma de la geométrica y acá aparece con \(s=8t\): engranaje 8. El factor con \(e^{\lambda(e^{t}-1)}\) es la firma de la Poisson, así que \(w=x+8y+3\).`,
+      steps: [R`Geométrica (desde 1): \(\varphi_y(s)=\frac{pe^{s}}{1-qe^{s}}\); con \(s=8t\) aparece \(8y\).`, R`\(e^{3t}=e^{bt}\) con \(b=3\).`, R`Poisson: \(\varphi_x(t)=e^{\lambda(e^{t}-1)}\). Entonces \(w=x+8y+3\), con \(x\) e \(y\) independientes.`, R`Ojo con la hoja impresa: el denominador figura como "\(1/qe^{8t}\)" y la exponencial lleva un signo menos adelante. Así escritas no son una FGM válida (con el menos, \(K''(0)=-\lambda<0\)), por eso se leen como \(1-qe^{8t}\) y \(e^{\lambda(e^{t}-1)}\). Conviene confirmarlo con la cátedra.`] }
+  ],
+  boss: {
+    name: 'La Máquina Rebelde', emoji: '🤖', source: 'Parcial 1C 2026 · Tema 1 · Ejercicio 2',
+    statement: R`<p>2) Dada la función \(w=3x-2y+5\) , y sabiendo que:</p>
+\[\sum_{x=1}^{\infty}(x-4)^2.(1-p)^{x-1}.p=12\qquad\qquad \int_0^{\infty}\frac{y.e^{-y/4}}{4^2.\Gamma(2)}.y^{2-1}\,dy=8\]
+<p>a) Hallar \(\varphi_w(t)\) (10%)</p>
+<p>b) Calcular la \(V(w)\) mediante la función cumulante. (10%)</p>`,
+    steps: [
+      { id: '2-B1', type: 'mc', q: R`Primer golpe: la serie \(\sum_{x=1}^{\infty}(x-4)^2(1-p)^{x-1}p=12\) es...`,
+        opts: [R`La varianza de una geométrica con \(E(x)=4\): \(p=\frac14\) y \(V=\frac{q}{p^2}=12\)`, R`La varianza de una Poisson con \(\lambda=4\)`, R`La esperanza de una geométrica con \(p=\frac{1}{12}\)`, R`La varianza de una binomial con \(n=12\)`],
+        why: R`\((1-p)^{x-1}p\) desde \(x=1\) es la función de probabilidad de la geométrica, y \((x-4)^2\) pesa la distancia a la media 4: es su varianza.`,
+        steps: [R`\(E(x)=\frac1p=4\Rightarrow p=\frac14\) y \(q=\frac34\).`, R`\(V(x)=\frac{q}{p^2}=\frac{0{,}75}{0{,}0625}=12\), que coincide con el dato.`] },
+      { id: '2-B2', type: 'mc', q: R`Segundo golpe: \(\int_0^{\infty}\frac{y\,e^{-y/4}}{4^2\,\Gamma(2)}\,y^{2-1}dy=8\) es la esperanza de...`,
+        opts: [R`Una Gamma con \(\alpha=2\) y \(\beta=4\): \(E=8\), \(V=32\)`, R`Una exponencial de media 4`, R`Una \(\chi^2\) con 8 grados de libertad`, R`Una Gamma con \(\alpha=4\) y \(\beta=2\)`],
+        why: R`La parte \(\frac{y^{\alpha-1}e^{-y/\beta}}{\beta^\alpha\Gamma(\alpha)}\) es la densidad Gamma con \(\alpha=2\) y \(\beta=4\); la \(y\) de adelante la convierte en \(E(y)\).`,
+        steps: [R`Gamma\((\alpha;\beta)\): \(f(y)=\frac{y^{\alpha-1}e^{-y/\beta}}{\beta^\alpha\Gamma(\alpha)}\), con \(\alpha=2\) y \(\beta=4\).`, R`\(E(y)=\alpha\beta=8\); \(V(y)=\alpha\beta^2=32\); \(\varphi_y(t)=(1-4t)^{-2}\).`] },
+      { id: '2-B3', type: 'mc', q: R`a) Tercer golpe: \(\varphi_w(t)\) es...`,
+        opts: [R`\(e^{5t}\cdot\frac{0{,}25\,e^{3t}}{1-0{,}75\,e^{3t}}\cdot(1+8t)^{-2}\)`, R`\(e^{5t}\cdot\frac{0{,}25\,e^{3t}}{1-0{,}75\,e^{3t}}\cdot(1-8t)^{-2}\)`, R`\(e^{5t}\cdot\frac{0{,}75\,e^{3t}}{1-0{,}25\,e^{3t}}\cdot(1+8t)^{-2}\)`, R`\(5\cdot\frac{0{,}25\,e^{t}}{1-0{,}75\,e^{t}}\cdot(1+4t)^{-2}\)`],
+        why: R`Sello \(e^{5t}\) por el "+5", engranaje 3 en la geométrica y engranaje \(-2\) en la Gamma: el signo menos entra al \(t\), por eso queda \(1+8t\).`,
+        steps: [R`\(\varphi_w(t)=e^{5t}\,\varphi_x(3t)\,\varphi_y(-2t)\) (independientes).`, R`\(\varphi_x(3t)=\frac{0{,}25e^{3t}}{1-0{,}75e^{3t}}\).`, R`\(\varphi_y(-2t)=(1-4\cdot(-2t))^{-2}=(1+8t)^{-2}\).`] },
+      { id: '2-B4', type: 'num', q: R`b) Golpe final: \(V(w)\) mediante la función cumulante.`, ans: 236, tol: 0.01,
+        why: R`Con la palanca ln: \(K_w(t)=5t+K_x(3t)+K_y(-2t)\). Dos vueltas en \(t=0\) sacan los engranajes al cuadrado.`,
+        steps: [R`\(K_w''(t)=9K_x''(3t)+4K_y''(-2t)\Rightarrow K_w''(0)=9\,V(x)+4\,V(y)\).`, R`\(V(w)=9\cdot12+4\cdot32=108+128=236\).`] }
+    ]
+  }
+});
+PALACIO.levels.push({
+  id: 3, emoji: '🌲', name: 'Bosque de los Grados de Libertad',
+  topic: 'Distribuciones en el muestreo: Z, t, chi-cuadrado y F',
+  scene: {
+    donde: R`Salís a un bosque por un sendero de tierra. A lo largo del sendero, de izquierda a derecha, hay cuatro árboles con un cartel cada uno: Z, \(\chi^2\), t y F. En la entrada hay una garita con un guardabosque.`,
+    ves: R`El primer árbol, <b>Z</b>, es un tronco recto y simétrico. El segundo, <b>\(\chi^2\)</b>, está hecho de troncos Z elevados al cuadrado y atados con soga: crece solo hacia la derecha y tiene tantos grados de libertad como troncos atados. El tercero, <b>t</b>, se parece a Z pero con las ramas de las puntas más largas: es un Z apoyado sobre la raíz de un \(\chi^2\) dividido por sus troncos, y cuantos más troncos tiene, más se parece a Z. El cuarto, <b>F</b>, es una balanza con un \(\chi^2\) dividido por sus troncos en cada platillo. El guardabosque de la garita te cobra un tronco de peaje cada vez que usás \(\bar x\) en lugar de \(\mu\).`,
+    trata: R`Z \(\sim N(0;1)\). \(\chi^2_\nu=\sum_{i=1}^{\nu}Z_i^2\). \(t_\nu=\frac{Z}{\sqrt{\chi^2_\nu/\nu}}\) (colas más pesadas). \(F_{\nu_1;\nu_2}=\frac{\chi^2_{\nu_1}/\nu_1}{\chi^2_{\nu_2}/\nu_2}\). El peaje: \(\frac{nS_n^2}{\sigma^2}=\frac{(n-1)S_{n-1}^2}{\sigma^2}\sim\chi^2_{n-1}\), un grado de libertad menos por estimar \(\mu\) con \(\bar x\).`
+  },
+  keys: [
+    R`\(\bar X\sim N\left(\mu;\frac{\sigma^2}{n}\right)\) y \(\frac{\bar X-\mu}{\sigma/\sqrt n}\sim N(0;1)\).`,
+    R`Notación de la cátedra: \(S_n^2\) es la varianza sesgada (divide por \(n\)); \(S_{n-1}^2\), la insesgada (divide por \(n-1\)).`,
+    R`\(\frac{nS_n^2}{\sigma^2}=\frac{(n-1)S_{n-1}^2}{\sigma^2}\sim\chi^2_{n-1}\) y \(\frac{\bar X-\mu}{S_{n-1}/\sqrt n}\sim t_{n-1}\).`,
+    R`\(\frac{S_{1}^2/\sigma_1^2}{S_{2}^2/\sigma_2^2}\sim F_{n_1-1;\,n_2-1}\), con varianzas insesgadas.`,
+    R`\(t_\nu^2=F_{1;\nu}\) y \(\frac{1}{F_{\nu_1;\nu_2}}=F_{\nu_2;\nu_1}\).`
+  ],
+  questions: [
+    { id: '3-1', type: 'mc', src: 'Práctica 1 · ej. 2a',
+      ctx: R`Siendo U una variable chi-cuadrado con 10 grados de libertad, calcule las siguientes probabilidades`,
+      q: R`a.- Pr [ 3,25 &lt; U &lt; 20,48 ]`,
+      opts: [R`0,95`, R`0,975`, R`0,90`, R`0,05`],
+      why: R`En el árbol \(\chi^2_{10}\), 3,25 deja 2,5 % de la copa a la izquierda y 20,48 deja 2,5 % a la derecha: entre los dos queda el 95 %.`,
+      steps: [R`Tabla \(\chi^2_{10}\): \(P(U<3{,}25)=0{,}025\) y \(P(U<20{,}48)=0{,}975\).`, R`\(P(3{,}25\lt U\lt 20{,}48)=0{,}975-0{,}025=0{,}95\).`] },
+    { id: '3-2', type: 'mc', src: 'Práctica 1 · ej. 4b',
+      ctx: R`Sea J una variable aleatoria con distribución T-Student con 14 grados de libertad. Calcule las siguientes probabilidades`,
+      q: R`b.- Pr [ -1.345 &lt; J &lt; 1.761 ]`,
+      opts: [R`0,85`, R`0,90`, R`0,80`, R`0,95`],
+      why: R`El árbol t es simétrico: 1,345 deja 10 % en la cola derecha (y −1,345 deja 10 % en la izquierda); 1,761 deja 5 % a la derecha.`,
+      steps: [R`\(t_{14}\): \(P(J>1{,}345)=0{,}10\Rightarrow P(J<-1{,}345)=0{,}10\).`, R`\(P(J<1{,}761)=0{,}95\).`, R`\(P(-1{,}345\lt J\lt 1{,}761)=0{,}95-0{,}10=0{,}85\).`] },
+    { id: '3-3', type: 'num', src: 'Práctica 1 · ej. 5c',
+      ctx: R`Siendo T una variable aleatoria con distribución T-Student con 9 grados de libertad. Halle el valor de t`,
+      q: R`c.- Pr [ -t &lt; T &lt; t ] = 0.99`, ans: 3.25, tol: 0.01,
+      why: R`Si en el medio queda 99 %, cada cola tiene 0,5 %: buscás el valor que deja 0,995 a su izquierda.`,
+      steps: [R`\(P(-t\lt T\lt t)=0{,}99\Rightarrow P(T\lt t)=0{,}995\).`, R`Tabla \(t_9\): \(t_{0{,}995}=3{,}250\).`] },
+    { id: '3-4', type: 'mc', src: 'Práctica 1 · ej. 12d',
+      ctx: R`Sean \(Y_1\,Y_2\,Y_3\,Y_4\,Y_5\) una muestra aleatoria de tamaño 5 de una población normal con media igual a cero y varianza igual a 1. Sea \(Y_6\) otra observación independiente de la misma población. Si se define \(\bar Y=\sum_{i=1}^{5}\frac{Y_i}{5}\) y \(W=\sum_{i=1}^{5}Y_i^2\), determine la distribución de las siguientes expresiones:`,
+      q: R`d.- \(H=\frac{\sqrt5.Y_6}{\sqrt W}\)`,
+      opts: [R`t de Student con 5 grados de libertad`, R`F con (1; 5) grados de libertad`, R`\(\chi^2\) con 5 grados de libertad`, R`Normal estándar`],
+      why: R`Un tronco Z (\(Y_6\)) apoyado sobre la raíz de un \(\chi^2_5\) dividido por sus 5 troncos: es exactamente el árbol t de 5 grados.`,
+      steps: [R`\(W=\sum_{i=1}^5Y_i^2\sim\chi^2_5\), independiente de \(Y_6\sim N(0;1)\).`, R`\(H=\frac{Y_6}{\sqrt{W/5}}\sim t_5\).`] },
+    { id: '3-5', type: 'mc', src: 'Práctica 1 · ej. 12f',
+      ctx: R`Mismo caso: \(Y_1,\ldots,Y_6\) normales estándar independientes, \(\bar Y=\sum_{i=1}^{5}\frac{Y_i}{5}\) y \(U=\sum_{i=1}^{5}(Y_i-\bar Y)^2\).`,
+      q: R`f.- \(M=\frac{2.(5.\bar Y^2+Y_6^2)}{U}\)`,
+      opts: [R`F con (2; 4) grados de libertad`, R`F con (2; 5) grados de libertad`, R`F con (1; 4) grados de libertad`, R`t con 4 grados de libertad`],
+      why: R`Arriba hay dos troncos Z al cuadrado (\(\sqrt5\,\bar Y\) e \(Y_6\)); abajo está \(U\), que pagó un tronco de peaje por usar \(\bar Y\) y le quedan 4. La balanza F compara \(\chi^2_2/2\) con \(\chi^2_4/4\).`,
+      steps: [R`\(\bar Y\sim N(0;\frac15)\Rightarrow5\bar Y^2=(\sqrt5\,\bar Y)^2\sim\chi^2_1\); \(Y_6^2\sim\chi^2_1\). La suma es \(\chi^2_2\).`, R`\(U=\sum(Y_i-\bar Y)^2\sim\chi^2_4\), independiente de \(\bar Y\).`, R`\(M=\frac{\chi^2_2/2}{\chi^2_4/4}=\frac{2\,\chi^2_2}{\chi^2_4}\sim F_{2;4}\).`] },
+    { id: '3-6', type: 'mc', src: 'Práctica 1 · ej. 14',
+      ctx: R`Sea \(X_1\,X_2\ldots X_n\) n variables aleatorias donde las \(X_i\sim N(100;25)\). Halle \(P(|\bar X-100|<1.5)\) para tamaños de muestra 10 , 25 , 64 , 100.`,
+      q: R`Elabore conclusiones. ¿Qué secuencia de probabilidades obtenés?`,
+      opts: [R`0,657; 0,866; 0,984; 0,997: cuanto más grande la muestra, más concentrada está \(\bar X\) alrededor de \(\mu\)`, R`0,866 para todos los tamaños: \(n\) no cambia nada`, R`0,997; 0,984; 0,866; 0,657: con más datos baja la probabilidad`, R`0,383; 0,547; 0,683; 0,866`],
+      why: R`Acá no hay peaje (\(\sigma\) es conocida): solo se ve cómo el árbol Z de \(\bar X\) se afina con \(\sqrt n\). Es la consistencia del Salón de los Espejos vista desde el bosque.`,
+      steps: [R`\(\sigma=5\Rightarrow \bar X\sim N(100;\frac{25}{n})\) y \(P(|\bar X-100|<1{,}5)=P\left(|Z|<\frac{1{,}5\sqrt n}{5}\right)\).`, R`\(n=10\): \(z=0{,}95\), da 0,657. \(n=25\): \(z=1{,}5\), da 0,866.`, R`\(n=64\): \(z=2{,}4\), da 0,984. \(n=100\): \(z=3\), da 0,997.`] },
+    { id: '3-7', type: 'mc', src: 'Parcial 1C 2026 · Tema 2 · ej. 1a',
+      ctx: R`1) Sea X una V.A. discreta y se tienen los siguientes datos sobre la misma<br>- \(\sum_{x=0}^{n}x\binom{n}{x}p^x(1-p)^{n-x}=18\)<br>- \(\sum_{x=0}^{n}(x-E(x))^2\binom{n}{x}p^x(1-p)^{n-x}=4{,}5\)`,
+      q: R`a) ¿Cuál es la probabilidad de que X sea menor a 18? (10%)`,
+      opts: [R`0,3926`, R`0,6074`, R`0,5778`, R`0,1853`],
+      why: R`Las dos sumas son la esperanza y la varianza de una binomial: \(np=18\) y \(npq=4{,}5\). "Menor a 18" no incluye al 18.`,
+      steps: [R`\(q=\frac{npq}{np}=\frac{4{,}5}{18}=0{,}25\Rightarrow p=0{,}75\) y \(n=\frac{18}{0{,}75}=24\).`, R`\(P(X<18)=P(X\le17)=\sum_{x=0}^{17}\binom{24}{x}0{,}75^x\,0{,}25^{24-x}=0{,}3926\).`, R`Trampas: \(P(X\le18)=0{,}5778\) incluye al 18; \(P(X\ge18)=0{,}6074\) es el complemento; \(P(X=18)=0{,}1853\).`] },
+    { id: '3-8', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 2',
+      ctx: R`2. Se quiere saber si un activo que sigue el indice S&amp;P500 es mas riesgoso que uno que sigue el indice S&amp;PMerval. Para ello se toman las ultimas 50 ruedas del primero y las ultimas 30 del segundo y se encuentran las siguientes varianzas sesgadas: \(S_{Merval}=0{,}013744\qquad S_{S\&amp;P_{500}}=0{,}02\)<br>Si se entiende a las varianzas poblacionales como una medida de riesgo, cual es la probabiliad de que el activo del Merval sea mas riesgoso que el del \(S\&amp;P_{500}\)? (15%)`,
+      q: R`¿Con qué distribución se plantea la comparación?`,
+      opts: [R`F con (29; 49) grados de libertad, pasando antes las varianzas sesgadas a insesgadas: \(\hat S^2=\frac{n}{n-1}S_n^2\)`, R`F con (30; 50) grados de libertad, usando las varianzas tal como vienen`, R`\(\chi^2\) con 79 grados de libertad`, R`t con 78 grados de libertad`],
+      why: R`Hay un árbol \(\chi^2\) por índice y cada uno pagó un tronco de peaje: Merval \(30-1=29\), S&amp;P \(50-1=49\). La balanza F los compara.`,
+      steps: [R`\(\frac{n S_n^2}{\sigma^2}\sim\chi^2_{n-1}\Rightarrow \frac{\hat S_M^2/\sigma_M^2}{\hat S_{SP}^2/\sigma_{SP}^2}\sim F_{29;49}\).`, R`\(\hat S_M^2=\frac{30}{29}\,0{,}013744=0{,}014218\); \(\hat S_{SP}^2=\frac{50}{49}\,0{,}02=0{,}020408\); cociente \(0{,}6967\).`, R`\(\sigma_M^2>\sigma_{SP}^2\iff F_{29;49}<0{,}6967\), así que la probabilidad es \(\approx0{,}15\).`] }
+  ],
+  boss: {
+    name: 'El Dragón del Bosque', emoji: '🐉', source: 'Parcial 1C 2026 · Tema 1 · Ejercicio 1',
+    statement: R`<p>1) Sea X una V.A. discreta y se tienen los siguientes datos sobre la misma</p>
+<p>-\(\sum_{x=0}^{n}x\binom{n}{x}p^x(1-p)^{n-x}\)=15<br>-\(\sum_{x=0}^{n}(x-E(x))^2\binom{n}{x}p^x(1-p)^{n-x}\)=6</p>
+<p>a) ¿Cuál es la probabilidad de que X sea mayor a 18? (10%)</p>
+<p>b) Sabiendo que \(n_x\)= 20 y \(n_y=23\) cual es la probabilidad de que \(\frac{V}{T}\) sea mayor a \(\frac{2}{3}\) (10%)</p>
+<p>\(V=\frac{S^2_{n_x}}{\sigma^2_x}\quad T=\frac{S^2_{n_y}}{\sigma^2_y}\)</p>`,
+    steps: [
+      { id: '3-B1', type: 'num', q: R`Primer golpe: de los datos, ¿cuánto vale \(n\)?`, ans: 25, tol: 0,
+        why: R`Las dos sumas son la esperanza (\(np=15\)) y la varianza (\(npq=6\)) de una binomial. Dividir una por la otra deja a \(q\) solo.`,
+        steps: [R`\(q=\frac{npq}{np}=\frac{6}{15}=0{,}4\Rightarrow p=0{,}6\).`, R`\(n=\frac{15}{0{,}6}=25\).`] },
+      { id: '3-B2', type: 'mc', q: R`a) Segundo golpe: \(P(X>18)\) con \(X\sim B(25;\,0{,}6)\)`,
+        opts: [R`0,0736`, R`0,1536`, R`0,9264`, R`0,1103`],
+        why: R`"Mayor a 18" arranca en 19. Se suma la cola exacta de la binomial; la aproximación normal sin corrección da otra cosa.`,
+        steps: [R`\(P(X>18)=P(X\ge19)=\sum_{x=19}^{25}\binom{25}{x}0{,}6^x\,0{,}4^{25-x}=0{,}0736\).`, R`Trampas: \(P(X\ge18)=0{,}1536\); \(P(X\le18)=0{,}9264\); normal sin corrección: \(P\left(Z>\frac{18-15}{\sqrt6}\right)=0{,}1103\).`] },
+      { id: '3-B3', type: 'mc', q: R`b) Tercer golpe: con \(S_n^2\) sesgada (como la anota la cátedra), ¿cómo se distribuye \(\frac{V}{T}\)?`,
+        opts: [R`\(\frac{V}{T}=\frac{19\cdot23}{20\cdot22}\,F_{19;22}\approx0{,}993\,F_{19;22}\)`, R`\(F_{20;23}\)`, R`\(\chi^2_{41}\)`, R`\(t_{42}\)`],
+        why: R`Cada árbol paga su tronco de peaje: \(20-1=19\) y \(23-1=22\). Como \(V\) y \(T\) usan la varianza sesgada, hay que corregir por \(\frac{n-1}{n}\) en cada platillo.`,
+        steps: [R`\(n_xV=\frac{n_xS^2_{n_x}}{\sigma_x^2}\sim\chi^2_{19}\Rightarrow V=\frac{\chi^2_{19}}{20}\); igual, \(T=\frac{\chi^2_{22}}{23}\).`, R`\(\frac{V}{T}=\frac{\chi^2_{19}/20}{\chi^2_{22}/23}=\frac{19/20}{22/23}\cdot\frac{\chi^2_{19}/19}{\chi^2_{22}/22}=0{,}9932\,F_{19;22}\).`] },
+      { id: '3-B4', type: 'mc', q: R`Golpe final: \(P\left(\frac{V}{T}>\frac23\right)\)`,
+        opts: [R`\(\approx 0{,}81\)`, R`\(\approx 0{,}19\)`, R`\(\approx 0{,}50\)`, R`\(\approx 0{,}05\)`],
+        why: R`\(\frac23\) está a la izquierda del centro de la balanza F (que ronda 1), así que la mayor parte de la distribución queda a la derecha.`,
+        steps: [R`\(P\left(\frac{V}{T}>\frac23\right)=P\left(F_{19;22}>\frac{2/3}{0{,}9932}\right)=P(F_{19;22}>0{,}6712)\).`, R`\(P(F_{19;22}>0{,}6712)=0{,}808\approx0{,}81\).`, R`Si se tomara \(S^2\) como insesgada, quedaría \(P(F_{19;22}>0{,}667)=0{,}812\): la respuesta no cambia.`] }
+    ]
+  }
+});
+
+PALACIO.levels.push({
+  id: 4, emoji: '🎪', name: 'Red de Seguridad',
+  topic: 'Intervalos de confianza: medias, proporciones y varianzas',
+  scene: {
+    donde: R`Entrás a una carpa de circo y te sentás en la primera fila. Arriba, una trapecista hace piruetas, pero las luces te encandilan y no la ves bien: solo ves su sombra en la arena.`,
+    ves: R`A tu derecha, el equipo de la red tensa una red centrada justo debajo de la sombra. El jefe de pista grita "¡95 %!": de cada 100 redes armadas así, 95 atrapan a la trapecista. Si pide "¡99 %!", la red tiene que ser más ancha. Para achicarla sin perder seguridad, el equipo enciende más reflectores: con 4 veces más reflectores, la red mide la mitad. Del mástil cuelga un cartel con el ancho de la red: dos veces el error estándar por el valor de tabla.`,
+    trata: R`Trapecista = el parámetro (\(\mu\), \(p\), \(\sigma^2\)...). Sombra = el estimador (\(\bar x\), \(\hat p\), \(S^2\)). Red = el intervalo de confianza. "¡95 %!" = nivel de confianza \(1-\alpha\). Reflectores = tamaño de muestra \(n\): la red se achica con \(\sqrt n\).`
+  },
+  keys: [
+    R`\(\mu\) con \(\sigma\) conocida: \(\bar x\pm z_{1-\alpha/2}\frac{\sigma}{\sqrt n}\).`,
+    R`\(\mu\) con \(\sigma\) desconocida (población normal): \(\bar x\pm t_{n-1;\,1-\alpha/2}\frac{S_{n-1}}{\sqrt n}\).`,
+    R`Proporción: \(\hat p\pm z_{1-\alpha/2}\sqrt{\frac{\hat p\hat q}{n}}\). Diferencia: \((\hat p_1-\hat p_2)\pm z\sqrt{\frac{\hat p_1\hat q_1}{n_1}+\frac{\hat p_2\hat q_2}{n_2}}\).`,
+    R`Diferencia de medias con \(\sigma\) conocidos: \((\bar x_1-\bar x_2)\pm z\sqrt{\frac{\sigma_1^2}{n_1}+\frac{\sigma_2^2}{n_2}}\).`,
+    R`Cociente de varianzas: \(\left(\frac{S_1^2/S_2^2}{F_{1-\alpha/2;\,n_1-1,\,n_2-1}}\,;\ \frac{S_1^2/S_2^2}{F_{\alpha/2;\,n_1-1,\,n_2-1}}\right)\).`,
+    R`Amplitud \(=2\,z\,\frac{\sigma}{\sqrt n}\): con \(n\times4\), la amplitud se divide por 2. Tamaño de muestra: \(n=\frac{z^2\sigma^2}{e^2}\) o \(n=\frac{z^2pq}{e^2}\).`
+  ],
+  questions: [
+    { id: '4-1', type: 'mc', src: 'Concepto',
+      q: R`El jefe de pista grita "¡95 %!". ¿Qué significa eso para un intervalo de confianza?`,
+      opts: [R`Si se repitiera el muestreo muchas veces, 95 de cada 100 intervalos armados así contendrían al parámetro`, R`Hay 95 % de probabilidad de que \(\mu\) esté dentro de este intervalo ya calculado`, R`El 95 % de los datos de la muestra cae dentro del intervalo`, R`El parámetro cambia y cae adentro el 95 % de las veces`],
+      why: R`La trapecista (el parámetro) no se mueve: lo que cambia de una función a otra es la red. Una red ya armada la atrapa o no; el 95 % habla del método de armar redes.`,
+      steps: [R`Antes de muestrear: \(P\left(\bar X-z\frac{\sigma}{\sqrt n}<\mu<\bar X+z\frac{\sigma}{\sqrt n}\right)=0{,}95\).`, R`Después de muestrear, el intervalo queda fijo: contiene a \(\mu\) o no. Por eso se habla de confianza y no de probabilidad.`] },
+    { id: '4-2', type: 'mc', src: 'Práctica 4 · ej. 1a',
+      ctx: R`Un analista en investigación de mercados recopiló datos de una muestra aleatoria de 100 clientes y verificó que las 100 personas gastaron, en promedio por año, la suma de $24.570. Se sabe que, por referencias pasadas, el desvió estándar suele ser de $6.600. Suponiendo que el gasto anual se distribuye normalmente utilizando un intervalo de confianza la 95% estime:`,
+      q: R`a.- el monto promedio de las compras`,
+      opts: [R`(23.276,4 ; 25.863,6)`, R`(23.484,3 ; 25.655,7)`, R`(24.440,6 ; 24.699,4)`, R`(11.634,0 ; 37.506,0)`],
+      why: R`La red se centra en la sombra (\(\bar x=24.570\)) y su ancho sale del error estándar \(\sigma/\sqrt n=660\), no de \(\sigma\) sola.`,
+      steps: [R`\(\frac{\sigma}{\sqrt n}=\frac{6600}{\sqrt{100}}=660\) y \(z_{0{,}975}=1{,}96\).`, R`\(24570\pm1{,}96\cdot660=24570\pm1293{,}6\).`, R`IC: (23.276,4 ; 25.863,6). Trampas: con \(z=1{,}645\) sale (23.484,3 ; 25.655,7); dividiendo por \(n\) en vez de \(\sqrt n\), (24.440,6 ; 24.699,4); sin dividir, (11.634 ; 37.506).`] },
+    { id: '4-3', type: 'num', src: 'Práctica 4 · ej. 1c',
+      ctx: R`Mismo caso: 100 clientes, desvío de $6.600 y confianza del 95 %.`,
+      q: R`c.- ¿cuál debería ser el tamaño de la muestra para reducir la longitud del intervalo hallado en a.- a la mitad?`, ans: 400, tol: 0,
+      why: R`La red se achica con la raíz de los reflectores: para que mida la mitad hacen falta 4 veces más.`,
+      steps: [R`Longitud \(=2\cdot1{,}96\cdot\frac{6600}{\sqrt n}\).`, R`\(\frac{1}{\sqrt{n'}}=\frac12\cdot\frac{1}{\sqrt{100}}\Rightarrow\sqrt{n'}=20\Rightarrow n'=400\).`] },
+    { id: '4-4', type: 'mc', src: 'Práctica 4 · ej. 2b',
+      ctx: R`Se desea estimar el salario medio por hora en determinada empresa. Para ello, se extrae una muestra al azar de 30 personas y se les pregunta el salario horario, obteniéndose así los siguientes resultados \(\sum_{i=1}^{30}X_i=1200\) y \(\sum_{i=1}^{30}X_i^2=48120\). Sabiendo que la variable salario hora tiene una distribución normal con varianza igual a 8, en el punto a (riesgo del 2 %) el intervalo da (38,80 ; 41,20).`,
+      q: R`b.- si se desconociera la varianza poblacional, introduzca las modificaciones numéricas que considere necesarias para lograr una mayor precisión en la estimación efectuada, explicando conceptualmente el por qué de las mismas`,
+      opts: [R`Usar \(S_{n-1}^2=4{,}138\) y \(t_{29;\,0{,}99}=2{,}462\): IC (39,09 ; 40,91)`, R`Seguir con \(z=2{,}326\) y \(\sigma^2=8\): IC (38,80 ; 41,20)`, R`Usar \(S_{n-1}^2=4{,}138\) con \(z_{0{,}99}=2{,}326\): IC (39,14 ; 40,86)`, R`Usar \(t_{29;\,0{,}975}=2{,}045\) con \(\sigma^2=8\)`],
+      why: R`Sin \(\sigma\), la varianza se estima con la muestra y se paga con la t (colas más pesadas). Acá la red sale más angosta porque \(S^2=4{,}14\) es mucho menor que 8.`,
+      steps: [R`\(\bar x=\frac{1200}{30}=40\); \(S_{n-1}^2=\frac{48120-30\cdot40^2}{29}=\frac{120}{29}=4{,}138\).`, R`\(t_{29;\,0{,}99}=2{,}462\) y \(\frac{S}{\sqrt n}=\sqrt{\frac{4{,}138}{30}}=0{,}3714\).`, R`\(40\pm2{,}462\cdot0{,}3714=40\pm0{,}914\): IC (39,09 ; 40,91). Con \(\sigma^2=8\) y \(z=2{,}326\) era (38,80 ; 41,20).`] },
+    { id: '4-5', type: 'mc', src: 'Práctica 4 · ej. 7b',
+      ctx: R`La empresa XYZ recibe un cargamento importante de partes electrónicas. Se desea estimar, por camino muestral, el porcentaje de unidades defectuosas.`,
+      q: R`b.- Independientemente del resultado obtenido en a.-, suponga que se decide tomar una muestra de 300 unidades de las cuales 36 resultaron defectuosas. Construya un intervalo de confianza al 95% de seguridad para la proporción poblacional`,
+      opts: [R`(0,083 ; 0,157)`, R`(0,089 ; 0,151)`, R`(0,072 ; 0,168)`, R`(0,075 ; 0,165)`],
+      why: R`La sombra es \(\hat p=36/300=0{,}12\) y el ancho de la red sale de \(\sqrt{\hat p\hat q/n}\), con la proporción de esta muestra (no la del inciso a).`,
+      steps: [R`\(\hat p=\frac{36}{300}=0{,}12\) y \(\sqrt{\frac{0{,}12\cdot0{,}88}{300}}=0{,}01876\).`, R`\(0{,}12\pm1{,}96\cdot0{,}01876=0{,}12\pm0{,}0368\): IC (0,083 ; 0,157).`, R`Trampas: con 90 % sale (0,089 ; 0,151); con 99 %, (0,072 ; 0,168); con \(p=0{,}20\) del inciso a, (0,075 ; 0,165).`] },
+    { id: '4-6', type: 'mc', src: 'Parcial 1C 2026 · Tema 2 · ej. 5a',
+      ctx: R`5) Trabaja en un canal deportivo, cuya siguiente transmisión será un partido de la NBA entre LAL, y GSW.<br>En los últimos 8 partidos, los LAL anotaron la siguiente cantidad de puntos: 98, 102, 95, 105, 100, 97, 103, 99. Mientras que, en los últimos 10 partidos, los GSW anotaron la siguiente cantidad de puntos: 110, 85, 120, 95, 105, 100, 90, 115, 80, 125<br>En estos partidos no jugaron entre sí, por lo que los resultados son independientes.`,
+      q: R`a) Determine un conjunto de valores plausibles para el cociente de varianzas con un nivel de confianza del 95% (10%). Tomá \(\sigma^2_{LAL}/\sigma^2_{GSW}\).`,
+      opts: [R`(0,0114 ; 0,2311)`, R`(0,0099 ; 0,2011)`, R`(0,0146 ; 0,1762)`, R`(0,1069 ; 0,4808)`],
+      why: R`Es la balanza F con \(8-1=7\) y \(10-1=9\) grados. La red entera queda lejos de 1: los LAL son mucho más regulares que los GSW.`,
+      steps: [R`\(S^2_{LAL}=10{,}98\) y \(S^2_{GSW}=229{,}17\) (insesgadas); cociente \(0{,}0479\).`, R`\(F_{0{,}975;\,7,9}=4{,}197\) y \(F_{0{,}025;\,7,9}=0{,}2073\).`, R`IC: \(\left(\frac{0{,}0479}{4{,}197};\ \frac{0{,}0479}{0{,}2073}\right)=(0{,}0114;\ 0{,}2311)\). Dado vuelta (\(\sigma^2_{GSW}/\sigma^2_{LAL}\)) es (4,33 ; 87,58).`, R`Trampas: con los grados de libertad invertidos sale (0,0099 ; 0,2011); con 90 %, (0,0146 ; 0,1762); la raíz de los extremos, (0,1069 ; 0,4808), es el IC del cociente de desvíos.`] },
+    { id: '4-7', type: 'mc', src: 'Parcial 1C 2026 · Tema 2 · ej. 5b',
+      ctx: R`Mismo caso LAL y GSW.`,
+      q: R`b) Si se asumiese mayor riesgo, como afectaría al tamaño del conjunto obtenido en el punto anterior? (10%)`,
+      opts: [R`Se achica: más riesgo (\(\alpha\) mayor) es menos confianza y una red más angosta`, R`Se agranda: más riesgo pide una red más grande`, R`No cambia: el tamaño depende solo de \(n\)`, R`Se corre hacia 1 sin cambiar de tamaño`],
+      why: R`Si el jefe de pista acepta que la trapecista caiga más seguido, la red puede ser más chica. Con 90 % el intervalo pasa de (0,0114 ; 0,2311) a (0,0146 ; 0,1762).`,
+      steps: [R`Con \(\alpha\) mayor, los cuantiles \(F_{1-\alpha/2}\) y \(F_{\alpha/2}\) se acercan entre sí.`, R`95 %: (0,0114 ; 0,2311). 90 %: (0,0146 ; 0,1762), más angosto.`] },
+    { id: '4-8', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 4a',
+      ctx: R`4. La gerencia comercial de "MarkovPay" busca evaluar la adopción de su plataforma en dos regiones del país. Específicamente, quieren estimar la diferencia entre la proporción de usuarios que prefieren la billetera virtual sobre los medios de pago tradicionales.<br>Los relevamientos muestrales arrojaron los siguientes resultados directos:<br>• Región Metropolitana: De una muestra de \(n_1=200\) personas, \(x_1=130\) prefieren la billetera virtual.<br>• Región Pampeana: De una muestra de \(n_2=250\) personas, \(x_2=125\) prefieren la billetera virtual.`,
+      q: R`a) Construya un intervalo de confianza del 95% para la diferencia de parámetros correspondientes a ambas regiones.(10%)`,
+      opts: [R`(0,059 ; 0,241)`, R`(0,074 ; 0,226)`, R`(0,031 ; 0,269)`, R`(0,084 ; 0,216)`],
+      why: R`Dos sombras (\(\hat p_1=0{,}65\) y \(\hat p_2=0{,}50\)) y una red para la distancia entre ellas. La red no toca el 0: en la Metropolitana prefieren más la billetera.`,
+      steps: [R`\(\hat p_1-\hat p_2=0{,}65-0{,}50=0{,}15\).`, R`\(\sqrt{\frac{0{,}65\cdot0{,}35}{200}+\frac{0{,}5\cdot0{,}5}{250}}=\sqrt{0{,}0021375}=0{,}04623\).`, R`\(0{,}15\pm1{,}96\cdot0{,}04623=0{,}15\pm0{,}0906\): IC (0,059 ; 0,241).`, R`Trampas: 90 % da (0,074 ; 0,226); 99 %, (0,031 ; 0,269); usando solo la varianza de la región 1, (0,084 ; 0,216).`] },
+    { id: '4-9', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 4b',
+      ctx: R`Mismo caso MarkovPay.`,
+      q: R`b) Si de cara al próximo mes se decidiera duplicar el tamaño de ambas muestras manteniendo idénticas las proporciones muestrales observadas, explique conceptualmente qué ocurriría con la precisión y la amplitud del intervalo de confianza. No realice cálculos.(10%)`,
+      opts: [R`Aumenta la precisión: el error estándar se divide por \(\sqrt2\) y la amplitud baja cerca de un 29 %`, R`La amplitud se reduce a la mitad`, R`No cambia nada, porque las proporciones son las mismas`, R`La amplitud se duplica`],
+      why: R`El doble de reflectores achica la red \(\sqrt2\) veces, no a la mitad: para la mitad harían falta 4 veces más datos.`,
+      steps: [R`Cada término \(\frac{\hat p\hat q}{n}\) se divide por 2, así que la raíz se divide por \(\sqrt2\).`, R`Amplitud nueva \(=\frac{1}{\sqrt2}\approx0{,}707\) de la anterior: unos 29 % menos, con la misma confianza.`] }
+  ],
+  boss: {
+    name: 'El Fantasma del Trapecio', emoji: '👻', source: 'Parcial 1C 2026 · Tema 1 · Ejercicio 4',
+    statement: R`<p>4) Es un fanático hincha de UBA FC. Este Domingo se juega el clásico contra CA UADE. Como la ansiedad por el partido lo mata, quiere averiguar cuanto será la diferencia de goles del partido.</p>
+<p>De acuerdo a los últimos 24 clásicos, su equipo ha metido 78 goles y el contrario 15 en los últimos 15. Además, se sabe que los desvíos de los goles por clásico son de 3 para UBA FC, y 2,22 para CA UADE.</p>
+<p>a) Con un 95% de confianza, ¿Cuánto será la diferencia de goles del partido? ¿A favor de quién?(10%)</p>
+<p>b) ¿Que modificaciones haría si quisiera aumentar el tamaño del rango al doble sin asumir más riesgo? Explique conceptualmente (10%)</p>`,
+    steps: [
+      { id: '4-B1', type: 'num', q: R`Primer golpe: ¿cuánto vale \(\bar x_{UBA}-\bar x_{UADE}\)?`, ans: 2.25, tol: 0.001,
+        why: R`Cada equipo tiene su sombra: goles por clásico. Ojo que los rivales tienen otro \(n\) (15 clásicos, no 24).`,
+        steps: [R`\(\bar x_{UBA}=\frac{78}{24}=3{,}25\) y \(\bar x_{UADE}=\frac{15}{15}=1\).`, R`Diferencia: \(3{,}25-1=2{,}25\) goles.`] },
+      { id: '4-B2', type: 'mc', q: R`Segundo golpe: ¿qué estadístico usás para la red?`,
+        opts: [R`Z, porque los desvíos poblacionales (3 y 2,22) son dato`, R`t con varianza conjunta y 37 grados de libertad`, R`t con 23 grados de libertad`, R`\(\chi^2\) con 37 grados de libertad`],
+        why: R`El enunciado da "los desvíos de los goles por clásico": se toman como \(\sigma\) conocidos, así que la red se arma con Z.`,
+        steps: [R`Con \(\sigma_1=3\) y \(\sigma_2=2{,}22\) conocidos: \(\frac{(\bar x_1-\bar x_2)-(\mu_1-\mu_2)}{\sqrt{\sigma_1^2/n_1+\sigma_2^2/n_2}}\sim N(0;1)\).`] },
+      { id: '4-B3', type: 'mc', q: R`a) Tercer golpe: el intervalo del 95 % para \(\mu_{UBA}-\mu_{UADE}\) es...`,
+        opts: [R`(0,61 ; 3,89)`, R`(0,87 ; 3,63)`, R`(0,76 ; 3,74)`, R`(−0,07 ; 4,57)`],
+        why: R`La red se centra en 2,25 y mide \(1{,}96\times0{,}839\) para cada lado. Cada varianza se divide por su propio \(n\).`,
+        steps: [R`\(\sqrt{\frac{3^2}{24}+\frac{2{,}22^2}{15}}=\sqrt{0{,}375+0{,}3286}=0{,}8388\).`, R`\(2{,}25\pm1{,}96\cdot0{,}8388=2{,}25\pm1{,}644\): IC (0,61 ; 3,89).`, R`Trampas: con \(z=1{,}645\), (0,87 ; 3,63); con \(n=24\) para los dos, (0,76 ; 3,74); sumando los desvíos en vez de las varianzas, (−0,07 ; 4,57).`] },
+      { id: '4-B4', type: 'mc', q: R`Cuarto golpe: ¿a favor de quién?`,
+        opts: [R`De UBA FC: todo el intervalo es positivo y no contiene al 0`, R`De CA UADE`, R`Empate: el intervalo contiene al 0`, R`No se puede saber con un intervalo`],
+        why: R`La red entera quedó del lado positivo: con 95 % de confianza, UBA FC mete entre 0,61 y 3,89 goles más por clásico.`,
+        steps: [R`\(0\notin(0{,}61;\ 3{,}89)\Rightarrow\mu_{UBA}-\mu_{UADE}>0\).`] },
+      { id: '4-B5', type: 'mc', q: R`b) Golpe final: para duplicar el tamaño del rango sin asumir más riesgo (mismo 95 %), ¿qué hacés?`,
+        opts: [R`Usar muestras 4 veces más chicas: la amplitud depende de \(1/\sqrt n\)`, R`Duplicar las muestras`, R`Bajar la confianza al 47,5 %`, R`Duplicar los desvíos poblacionales`],
+        why: R`"Sin asumir más riesgo" deja quieto el 95 %. La palanca que queda es el \(n\): con 4 veces menos reflectores, la red mide el doble.`,
+        steps: [R`Amplitud \(=2\cdot1{,}96\cdot\sqrt{\frac{\sigma_1^2}{n_1}+\frac{\sigma_2^2}{n_2}}\).`, R`Con \(n_1/4\) y \(n_2/4\), la raíz se multiplica por \(\sqrt4=2\): amplitud doble.`, R`Otra vía válida: subir la confianza (menos riesgo) hasta \(z=3{,}92\), alrededor de 99,99 %. Bajar la confianza sería asumir más riesgo.`] }
+    ]
+  }
+});
+PALACIO.levels.push({
+  id: 5, emoji: '⚖️', name: 'Tribunal de los Errores',
+  topic: 'Test de hipótesis: errores de tipo I y II, potencia y diferencia de medias',
+  scene: {
+    donde: R`Entrás a un tribunal de madera oscura y te sentás en el estrado del jurado. En el banquillo está el acusado, que se llama \(H_0\): "acá no pasó nada, el parámetro no cambió".`,
+    ves: R`Por ley, \(H_0\) es inocente hasta que se demuestre lo contrario. El fiscal presenta la evidencia: la muestra. Detrás del juez hay una baranda que marca la <b>zona de duda razonable</b>: si la evidencia cae adentro, el acusado queda libre; si cae afuera, se lo condena. A la izquierda del juez cuelga un cartel rojo: "α: condenar a un inocente". A la derecha, uno gris: "β: dejar libre a un culpable". Arriba hay una lupa gigante con el cartel "Potencia = 1 − β: atrapar al culpable". Si pedís más pruebas (más \(n\)), la lupa aumenta: más potencia sin tocar α.`,
+    trata: R`Acusado = \(H_0\). Condenar = rechazar \(H_0\). Zona de duda razonable = región de aceptación. Error de tipo I = condenar a un inocente: rechazar \(H_0\) siendo verdadera, con probabilidad \(\alpha\). Error de tipo II = absolver a un culpable: no rechazar \(H_0\) siendo falsa, con probabilidad \(\beta\). Potencia \(=1-\beta\).`
+  },
+  keys: [
+    R`\(\alpha=P(\text{rechazar }H_0\mid H_0\text{ verdadera})\); \(\beta=P(\text{no rechazar }H_0\mid H_1\text{ verdadera})\); potencia \(=1-\beta\).`,
+    R`Media con \(\sigma\) conocida: \(z=\frac{\bar x-\mu_0}{\sigma/\sqrt n}\). Con \(\sigma\) desconocida: \(t=\frac{\bar x-\mu_0}{S_{n-1}/\sqrt n}\sim t_{n-1}\).`,
+    R`Dos medias con varianzas desconocidas e iguales: \(t=\frac{\bar x_1-\bar x_2}{S_p\sqrt{\frac1{n_1}+\frac1{n_2}}}\sim t_{n_1+n_2-2}\), con \(S_p^2=\frac{(n_1-1)S_1^2+(n_2-1)S_2^2}{n_1+n_2-2}\).`,
+    R`Potencia (\(\sigma\) conocida): el valor crítico se fija con \(\mu_0\); la probabilidad de caer en la región de rechazo se calcula con la media verdadera \(\mu_1\).`,
+    R`Más \(n\): menor error estándar y más potencia. Bajar \(\alpha\) sin cambiar \(n\): sube \(\beta\).`
+  ],
+  questions: [
+    { id: '5-1', type: 'mc', src: 'Concepto',
+      q: R`En el Tribunal, condenar a un acusado que en realidad era inocente es...`,
+      opts: [R`Error de tipo I: rechazar \(H_0\) cuando es verdadera (probabilidad \(\alpha\))`, R`Error de tipo II: no rechazar \(H_0\) cuando es falsa (probabilidad \(\beta\))`, R`La potencia del test`, R`El p-valor`],
+      why: R`Es el cartel rojo de la izquierda: \(\alpha\) es el riesgo que el tribunal acepta de condenar a un inocente, y se fija antes de mirar la evidencia.`,
+      steps: [R`\(\alpha=P(\text{rechazar }H_0\mid H_0\text{ verdadera})\).`, R`Se elige de antemano (por ejemplo, 0,05) y define el valor crítico.`] },
+    { id: '5-2', type: 'mc', src: 'Concepto',
+      q: R`¿Qué mide la lupa gigante del Tribunal (la potencia)?`,
+      opts: [R`La probabilidad de rechazar \(H_0\) cuando es falsa: atrapar al culpable`, R`La probabilidad de rechazar \(H_0\) cuando es verdadera`, R`La probabilidad de que \(H_0\) sea verdadera`, R`\(1-\alpha\)`],
+      why: R`Potencia \(=1-\beta\): la chance de que, si el acusado es culpable (\(H_1\) es cierta), la evidencia caiga fuera de la zona de duda razonable.`,
+      steps: [R`\(\text{Potencia}=1-\beta=P(\text{rechazar }H_0\mid H_1\text{ verdadera})\).`, R`Depende de qué tan lejos esté la verdad de \(H_0\), de \(n\), de \(\sigma\) y de \(\alpha\).`] },
+    { id: '5-3', type: 'mc', src: 'Práctica 5 · ej. 1a',
+      ctx: R`Durante el año 1992 las ventas en un cierto comercio minorista indicaron un importe promedio por factura de $ 6.000 con un coeficiente de dispersión de $ 2.000. A los efectos de contrastar la hipótesis de que durante el presente año las ventas promedio no han variado (en moneda constante) se decide auditar una muestra aleatoria de 400 facturas, fijándose como región de aceptación de la hipótesis nula \[5804\lt\bar X\lt 6196\]`,
+      q: R`a.- Fijar las hipótesis a contrastar y determinar el nivel de significación del test`,
+      opts: [R`\(H_0:\mu=6000\) contra \(H_1:\mu\ne6000\); \(\alpha=0{,}05\)`, R`\(H_0:\mu=6000\) contra \(H_1:\mu>6000\); \(\alpha=0{,}025\)`, R`\(H_0:\mu\ne6000\) contra \(H_1:\mu=6000\); \(\alpha=0{,}05\)`, R`\(H_0:\mu=6000\) contra \(H_1:\mu\ne6000\); \(\alpha=0{,}10\)`],
+      why: R`La zona de duda razonable tiene dos barandas, una a cada lado de 6000: el test es bilateral. Cada baranda está a \(196=1{,}96\) errores estándar.`,
+      steps: [R`\(\sigma_{\bar x}=\frac{2000}{\sqrt{400}}=100\).`, R`\(6196-6000=196=1{,}96\cdot100\): cada cola deja \(0{,}025\).`, R`\(\alpha=2\cdot0{,}025=0{,}05\).`] },
+    { id: '5-4', type: 'mc', src: 'Práctica 5 · ej. 1b',
+      ctx: R`Mismo caso: región de aceptación \(5804\lt\bar X\lt 6196\), con \(\sigma=2000\) y \(n=400\).`,
+      q: R`b.- Supóngase que, en realidad, durante el presente año las ventas promedio fueron de $5.900. con el mismo coeficiente de dispersión. ¿Qué tipo de error se cometería al aceptar la hipótesis nula y cuál es la probabilidad de cometerlo?`,
+      opts: [R`Error de tipo II, con \(\beta\approx0{,}83\)`, R`Error de tipo I, con \(\alpha=0{,}05\)`, R`Error de tipo II, con \(\beta\approx0{,}17\)`, R`Error de tipo I, con probabilidad 0,83`],
+      why: R`El acusado es culpable (la media cambió a 5900) y lo dejás libre: error de tipo II. Como 5900 queda adentro de la zona de duda, la evidencia casi siempre cae ahí y el culpable zafa.`,
+      steps: [R`\(\beta=P(5804\lt\bar X\lt 6196\mid\mu=5900)\).`, R`\(=P\left(\frac{5804-5900}{100}\lt Z\lt\frac{6196-5900}{100}\right)=P(-0{,}96\lt Z\lt 2{,}96)\).`, R`\(=0{,}9985-0{,}1685=0{,}83\). La potencia es apenas \(0{,}17\).`] },
+    { id: '5-5', type: 'mc', src: 'Ejercitación potencia del test · Caso B',
+      ctx: R`Un actuario evalúa el costo medio de los reclamos por hectárea afectada por granizo. El valor histórico base es \(\mu_0=\$12{,}000\) con un desvío estándar conocido de \(\sigma=\$3{,}500\). Debido al alto costo de inspección en campo, el departamento de peritaje extrae una muestra pequeña de solo \(n=25\) siniestros para testear \(H_0:\mu=12{,}000\) vs \(H_1:\mu>12{,}000\) con un \(\alpha=0{,}05\).`,
+      q: R`1. Obtenga el valor crítico de la media en pesos (\(\bar x_{\text{crítico}}\)). 2. Si un cambio climático severo elevara el costo medio real de los reclamos por granizo a \(\mu_1=\$13{,}500\), calcule la potencia del test bajo este tamaño de muestra.`,
+      opts: [R`\(\bar x_{\text{crítico}}=13.151{,}5\) y potencia \(\approx0{,}69\)`, R`\(\bar x_{\text{crítico}}=13.151{,}5\) y potencia \(\approx0{,}31\)`, R`\(\bar x_{\text{crítico}}=13.372\) y potencia \(\approx0{,}57\)`, R`\(\bar x_{\text{crítico}}=12.230{,}3\) y potencia \(\approx1\)`],
+      why: R`Con solo 25 peritajes la lupa es chica: el error estándar es 700 y las campanas de \(H_0\) y \(H_1\) se pisan. En casi 1 de cada 3 auditorías el aumento de costos pasaría sin detectarse.`,
+      steps: [R`\(\sigma_{\bar x}=\frac{3500}{\sqrt{25}}=700\); test unilateral derecho con \(z_{0{,}95}=1{,}645\).`, R`\(\bar x_{\text{crítico}}=12000+1{,}645\cdot700=13151{,}5\).`, R`Potencia \(=P\left(Z>\frac{13151{,}5-13500}{700}\right)=P(Z>-0{,}50)=0{,}6915\) con tabla (0,6907 exacto); \(\beta\approx0{,}31\).`, R`Trampas: con \(z=1{,}96\) el crítico sería 13.372 y la potencia 0,57; dividiendo por \(n\) en vez de \(\sqrt n\), 12.230,3.`] },
+    { id: '5-6', type: 'mc', src: 'Ejercitación potencia del test · Caso B.3',
+      ctx: R`Mismo Caso B: \(n=25\), \(\sigma=3500\) y potencia \(\approx0{,}69\) contra \(\mu_1=13500\).`,
+      q: R`3. Pregunta conceptual: Analice por qué el uso de muestras pequeñas expone a la compañía a un elevado riesgo técnico.`,
+      opts: [R`Con \(n\) chico el error estándar es grande, las campanas de \(H_0\) y \(H_1\) se solapan y \(\beta\) crece: muchos aumentos reales pasan sin detectarse`, R`Con \(n\) chico sube \(\alpha\) y se rechaza \(H_0\) de más`, R`Con \(n\) chico el test deja de ser válido y no se puede calcular`, R`El tamaño de muestra solo afecta al intervalo, no al test`],
+      why: R`Menos pruebas, lupa más chica. \(\alpha\) queda fijo en 0,05 por diseño: lo que paga la muestra chica es \(\beta\), el culpable que se escapa.`,
+      steps: [R`\(\sigma_{\bar x}=\frac{\sigma}{\sqrt n}\): con \(n=25\) vale 700; con \(n=100\) valdría 350.`, R`Con \(n=100\): \(\bar x_{\text{crítico}}=12575{,}75\) y potencia \(=P(Z>-2{,}64)\approx0{,}996\).`] },
+    { id: '5-7', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 5a',
+      ctx: R`5. La compañía "Tablas Actuariales S.A." está auditando el tiempo promedio (en meses) que tardan en liquidarse los siniestros de seguros de vida en dos filiales distintas. Se sospecha que la Filial A es más lenta en procesar los pagos que la Filial B debido a burocracia interna.<br>Se extrajeron muestras independientes se reportaron los siguientes estadísticos:<br>• Filial A (\(n_1=10\)): Media \(\bar X1=14\) meses | Varianza insesgada: \(Sn-1^2=4{,}00\)<br>• Filial B (\(n_2=12\)): Media \(\bar X2=11\) meses | Varianza insesgada: \(Sn-1^2=4{,}50\)<br>Se pide (asumiendo poblaciones normales):`,
+      q: R`a) Evalúe si la Filial A presenta un rendimiento inferior al de la Filial B. Justifique rigurosamente la elección de las herramientas estadísticas empleadas.(10%)`,
+      opts: [R`\(H_1:\mu_A>\mu_B\), t con varianza conjunta: \(t=3{,}39>t_{20;\,0{,}95}=1{,}725\). Se rechaza \(H_0\): A es más lenta`, R`\(H_1:\mu_A\ne\mu_B\): \(t=3{,}39\lt t_{20;\,0{,}975}\), no se rechaza \(H_0\)`, R`\(H_1:\mu_A\lt\mu_B\): con \(t=3{,}39\) no se rechaza \(H_0\)`, R`Z con \(\sigma\) conocidos: \(z=3{,}39\), no se puede concluir`],
+      why: R`"Más lenta" es una sospecha con dirección: la acusación es \(\mu_A>\mu_B\) (unilateral derecho). Las varianzas son desconocidas y parecidas (\(4{,}5/4=1{,}125\)), así que se usa t con varianza conjunta.`,
+      steps: [R`\(S_p^2=\frac{9\cdot4+11\cdot4{,}5}{20}=\frac{85{,}5}{20}=4{,}275\).`, R`\(t=\frac{14-11}{\sqrt{4{,}275\left(\frac1{10}+\frac1{12}\right)}}=\frac{3}{0{,}8853}=3{,}39\).`, R`\(t_{20;\,0{,}95}=1{,}725\) y \(3{,}39>1{,}725\): se rechaza \(H_0\). Hay evidencia de que la Filial A tarda más.`] },
+    { id: '5-8', type: 'mc', src: 'Parcial 1C 2026 · Tema B · ej. 5b',
+      ctx: R`Mismo caso: Filial A (\(n_1=10\)) y Filial B (\(n_2=12\)), test unilateral con \(H_1:\mu_A>\mu_B\).`,
+      q: R`b) Suponiendo que para analizar la potencia del test ante muestras futuras se asume que las verdaderas varianzas poblacionales son conocidas e iguales a \(\sigma_1^2=\sigma_2^2=4{,}25\), determine la potencia de esta prueba (con \(\alpha=0{,}05\)) para detectar una diferencia real en los tiempos de procesamiento de \(\mu_1-\mu_2=2\) meses.(10%)`,
+      opts: [R`\(\approx0{,}73\)`, R`\(\approx0{,}27\)`, R`\(\approx0{,}95\)`, R`\(\approx0{,}62\)`],
+      why: R`Con varianzas conocidas se usa Z. La baranda se pone con \(H_0\) (diferencia 0) y la lupa se mira con la verdad (diferencia 2).`,
+      steps: [R`\(\sigma_{\bar x_1-\bar x_2}=\sqrt{4{,}25\left(\frac1{10}+\frac1{12}\right)}=0{,}8827\).`, R`Valor crítico: \(d_c=1{,}645\cdot0{,}8827=1{,}452\).`, R`Potencia \(=P\left(Z>\frac{1{,}452-2}{0{,}8827}\right)=P(Z>-0{,}62)=0{,}73\). Trampa: con 1,96 (bilateral) daría 0,62.`] },
+    { id: '5-9', type: 'mc', src: 'Práctica 5 · ej. 6b',
+      ctx: R`La cantidad promedio que se coloca en un recipiente en un proceso de llenado se supone que es de 20 litros. En forma periódica, se escogen a la azar 25 recipientes y el contenido de cada uno de éstos se pesa. Se juzga al proceso como fuera de control cuando la media muestral \(\bar x\) es menor o igual a 19.8 o mayor o igual a 20.2 litros. Se supone que la cantidad que se vacía en cada recipiente se encuentra aproximada, en forma adecuada, por una distribución normal con una desviación estándar de 0,5 litros.`,
+      q: R`b.- Obtenga la probabilidad de error de tipo I. Y, si la media real de llenado fuera 19,7 litros, ¿cuál sería la potencia?`,
+      opts: [R`\(\alpha\approx0{,}0455\) y potencia \(\approx0{,}84\)`, R`\(\alpha=0{,}05\) y potencia \(\approx0{,}16\)`, R`\(\alpha\approx0{,}0228\) y potencia \(\approx0{,}84\)`, R`\(\alpha\approx0{,}0455\) y potencia \(\approx0{,}50\)`],
+      why: R`Las barandas están a 2 errores estándar de 20: dejan 2,28 % en cada cola. Si el llenado real es 19,7, la evidencia cae casi siempre a la izquierda de 19,8 y el tribunal condena con razón.`,
+      steps: [R`\(\sigma_{\bar x}=\frac{0{,}5}{\sqrt{25}}=0{,}1\); las barandas están en \(20\pm0{,}2=20\pm2\sigma_{\bar x}\).`, R`\(\alpha=P(|Z|\ge2)=2\cdot0{,}0228=0{,}0455\).`, R`Con \(\mu=19{,}7\): \(P(\bar x\le19{,}8)+P(\bar x\ge20{,}2)=P(Z\le1)+P(Z\ge5)=0{,}8413\).`] }
+  ],
+  boss: {
+    name: 'El Fiscal Implacable', emoji: '🦹', source: 'Parcial 1C 2026 · Tema 1 · Ejercicio 5',
+    statement: R`<p>5) Una empresa de seguridad informática está comparando dos tipos de servidores (Tipo A y Tipo B) para determinar si existe una diferencia en el tiempo de respuesta (en milisegundos, ms) ante una carga de trabajo estándar. Se asume que el tiempo de respuesta sigue una distribución normal en ambos casos.</p>
+<p>Se selecciona una muestra aleatoria de 15 servidores tipo A y 13 servidores tipo B, obteniéndose los siguientes resultados:</p>
+<ul><li>Tipo A (n<sub>1</sub>=15): Tiempo promedio \(\bar X_1\)= 150ms, Desviación estándar muestral s<sub>1</sub> = 12ms.</li><li>Tipo B (n<sub>2</sub>= 13): Tiempo promedio \(\bar X_2\)= 158ms, Desviación estándar muestral s<sub>2</sub> = 10ms.</li></ul>
+<p>a) ¿Existe diferencia significativa entre el tiempo promedio de respuesta de los dos tipos de servidores? Utilice un nivel de significación de α=0,05 (15%)</p>
+<p>b) Suponga que la verdadera diferencia entre las medias es de 10ms (es decir, µ<sub>1</sub> - µ<sub>2</sub> = -10) y que la desviación estándar conjunta es σ<sub>c</sub> = 11ms. Calcule la potencia del test para detectar esta diferencia con el tamaño de muestra y nivel de significación original (10%)</p>`,
+    steps: [
+      { id: '5-B1', type: 'mc', q: R`Primer golpe: ¿qué hipótesis se contrastan?`,
+        opts: [R`\(H_0:\mu_1=\mu_2\) contra \(H_1:\mu_1\ne\mu_2\)`, R`\(H_0:\mu_1=\mu_2\) contra \(H_1:\mu_1\lt\mu_2\)`, R`\(H_0:\mu_1\ne\mu_2\) contra \(H_1:\mu_1=\mu_2\)`, R`\(H_0:\sigma_1^2=\sigma_2^2\) contra \(H_1:\sigma_1^2\ne\sigma_2^2\)`],
+        why: R`"¿Existe diferencia?" no dice hacia qué lado: el fiscal acusa de "distinto", así que el test es bilateral. El acusado (\(H_0\)) siempre lleva el igual.`,
+        steps: [R`\(H_0:\mu_1-\mu_2=0\); \(H_1:\mu_1-\mu_2\ne0\); \(\alpha=0{,}05\) repartido en dos colas.`] },
+      { id: '5-B2', type: 'mc', q: R`Segundo golpe: ¿con qué estadístico?`,
+        opts: [R`t con varianza conjunta y 26 grados de libertad: \(\sigma\) desconocidas y compatibles con ser iguales`, R`Z, porque las muestras son grandes`, R`t con 14 grados de libertad`, R`F con (14; 12) grados de libertad`],
+        why: R`Las varianzas poblacionales no son dato y las muestrales son parecidas (\(144/100=1{,}44\), menor que \(F_{0{,}975;\,14,12}=3{,}21\)): se juntan en una sola \(S_p^2\) con \(15+13-2=26\) grados.`,
+        steps: [R`\(F=\frac{12^2}{10^2}=1{,}44\lt 3{,}21\): no se rechaza la igualdad de varianzas.`, R`\(t=\frac{\bar x_1-\bar x_2}{S_p\sqrt{\frac1{n_1}+\frac1{n_2}}}\sim t_{26}\) bajo \(H_0\).`] },
+      { id: '5-B3', type: 'num', q: R`Tercer golpe: calculá el estadístico t observado (dos decimales).`, ans: -1.898, tol: 0.02, hint: 'Ojo con el signo: \\(\\bar x_1-\\bar x_2\\) es negativo.',
+        why: R`La evidencia: 8 ms de diferencia, medidos en errores estándar.`,
+        steps: [R`\(S_p^2=\frac{14\cdot144+12\cdot100}{26}=\frac{3216}{26}=123{,}69\Rightarrow S_p=11{,}12\).`, R`\(S_p\sqrt{\frac1{15}+\frac1{13}}=11{,}12\cdot0{,}3789=4{,}214\).`, R`\(t=\frac{150-158}{4{,}214}=-1{,}90\).`] },
+      { id: '5-B4', type: 'mc', q: R`Cuarto golpe: ¿qué decide el tribunal con \(\alpha=0{,}05\)?`,
+        opts: [R`No se rechaza \(H_0\): \(|t|=1{,}90\lt t_{26;\,0{,}975}=2{,}056\). No hay diferencia significativa`, R`Se rechaza \(H_0\): \(|t|=1{,}90>1{,}645\)`, R`Se rechaza \(H_0\): el tipo B es 8 ms más lento`, R`No se puede decidir sin conocer \(\sigma\)`],
+        why: R`La evidencia cae dentro de la zona de duda razonable, aunque cerca de la baranda (p-valor 0,069). El acusado queda libre: no se prueba la diferencia, que no es lo mismo que probar que son iguales.`,
+        steps: [R`\(t_{26;\,0{,}975}=2{,}056\); región de rechazo: \(|t|>2{,}056\).`, R`\(|-1{,}90|\lt 2{,}056\): no se rechaza \(H_0\) (p-valor \(=0{,}069\)).`] },
+      { id: '5-B5', type: 'mc', q: R`b) Golpe final: la potencia para detectar \(\mu_1-\mu_2=-10\) con \(\sigma_c=11\)`,
+        opts: [R`\(\approx0{,}67\)`, R`\(\approx0{,}33\)`, R`\(\approx0{,}05\)`, R`\(\approx0{,}95\)`],
+        why: R`La baranda se fija con \(H_0\) (diferencia 0) y la lupa mira la verdad (diferencia −10). Con \(\sigma_c\) dada como conocida se trabaja con Z, como en la Ejercitación de potencia de la cátedra.`,
+        steps: [R`\(\sigma_{\bar x_1-\bar x_2}=11\sqrt{\frac1{15}+\frac1{13}}=4{,}168\); barandas en \(\pm1{,}96\cdot4{,}168=\pm8{,}17\).`, R`Potencia \(=P(\bar D\lt-8{,}17\mid-10)+P(\bar D>8{,}17\mid-10)=P(Z\lt 0{,}44)+P(Z>4{,}36)\).`, R`\(=0{,}670+0{,}000=0{,}67\). Si usás \(t_{26}=2{,}056\) en lugar de 1,96, da 0,63.`] }
+    ]
+  }
+});
+
+PALACIO.levels.push({
+  id: 6, emoji: '🏰', name: 'Torre de las Poblaciones',
+  topic: 'ANOVA de un factor: comparar varias medias con F',
+  warn: R`<b>Sala extra.</b> ANOVA no aparece en el material del 1er parcial que está en esta carpeta (Prácticas 1 a 5 y parciales Temas 1, 2 y B). Esta torre usa datos reales del parcial para mostrarte que el ANOVA con 2 poblaciones es el mismo test t que ya sabés. Si estudiás para el recuperatorio, priorizá las salas 1 a 5.`,
+  scene: {
+    donde: R`Subís por la escalera caracol de una torre redonda. En cada piso hay \(k\) departamentos, uno por población, y en cada uno vive un grupo de observaciones.`,
+    ves: R`En el hall de entrada, el portero tiene dos micrófonos. El de la izquierda mide el ruido <b>entre</b> departamentos: qué tan distinta es la media de cada grupo de la media general. El de la derecha mide el ruido <b>dentro</b> de cada departamento: cuánto varían las observaciones alrededor de su propia media. El portero divide el ruido promedio de la izquierda por el de la derecha: si da mucho más que 1, alguna media es distinta. En la puerta, un guardia revisa que todas las paredes tengan el mismo grosor (varianzas iguales): si no, no te deja subir.`,
+    trata: R`Departamentos = poblaciones (tratamientos). Ruido entre = \(SC_{\text{entre}}\), con \(k-1\) grados de libertad. Ruido dentro = \(SC_{\text{dentro}}\), con \(N-k\) grados. División del portero = \(F=\frac{CM_{\text{entre}}}{CM_{\text{dentro}}}\sim F_{k-1;\,N-k}\) bajo \(H_0\). Paredes del mismo grosor = homocedasticidad.`
+  },
+  keys: [
+    R`\(H_0:\mu_1=\mu_2=\dots=\mu_k\) contra \(H_1\): al menos una media es distinta.`,
+    R`\(SC_{\text{total}}=SC_{\text{entre}}+SC_{\text{dentro}}\).`,
+    R`\(SC_{\text{entre}}=\sum_{j=1}^{k}n_j(\bar x_j-\bar x)^2\) y \(SC_{\text{dentro}}=\sum_{j=1}^{k}(n_j-1)S_j^2\).`,
+    R`\(F=\frac{SC_{\text{entre}}/(k-1)}{SC_{\text{dentro}}/(N-k)}\sim F_{k-1;\,N-k}\). Se rechaza \(H_0\) si \(F>F_{1-\alpha;\,k-1,\,N-k}\).`,
+    R`Supuestos: poblaciones normales, muestras independientes y varianzas iguales.`,
+    R`Con \(k=2\): \(F=t^2\) (el t con varianza conjunta) y el p-valor es el mismo.`
+  ],
+  questions: [
+    { id: '6-1', type: 'mc', src: 'Concepto',
+      q: R`El portero de la Torre contrasta una sola hipótesis nula. ¿Cuál?`,
+      opts: [R`\(H_0:\mu_1=\mu_2=\dots=\mu_k\); \(H_1\): al menos una es distinta`, R`\(H_0\): todas las medias son distintas`, R`\(H_0:\sigma_1^2=\dots=\sigma_k^2\)`, R`\(H_1\): todas las medias son distintas entre sí`],
+      why: R`El ANOVA compara medias usando varianzas. Rechazar \(H_0\) dice que algún departamento suena distinto, no cuál ni que todos lo sean.`,
+      steps: [R`\(H_1\) es la negación de \(H_0\): alcanza con que una media difiera.`, R`Las varianzas iguales son un supuesto (el guardia de la puerta), no la hipótesis que se contrasta.`] },
+    { id: '6-2', type: 'mc', src: 'Práctica de la Torre',
+      ctx: R`Situación de práctica, no es un ejercicio de la cátedra.`,
+      q: R`En un piso hay \(k=3\) tipos de servidor y se miden 15 de cada uno (\(N=45\)). ¿Con qué distribución compara el portero?`,
+      opts: [R`\(F_{2;\,42}\); con \(\alpha=0{,}05\) se rechaza si \(F>3{,}22\)`, R`\(F_{3;\,45}\)`, R`\(F_{2;\,44}\)`, R`\(t_{42}\)`],
+      why: R`El micrófono "entre" escucha a 3 departamentos: \(k-1=2\) grados. El "dentro" escucha 45 observaciones y paga un grado por cada media de departamento: \(N-k=42\).`,
+      steps: [R`Numerador: \(k-1=3-1=2\). Denominador: \(N-k=45-3=42\).`, R`\(F_{0{,}95;\,2,42}=3{,}22\).`] },
+    { id: '6-3', type: 'mc', src: 'Concepto',
+      q: R`Si el ruido promedio entre departamentos es parecido al ruido promedio dentro, ¿cuánto da F y qué concluís?`,
+      opts: [R`\(F\approx1\): no hay evidencia de medias distintas`, R`\(F\approx0\): las medias son distintas`, R`\(F\) muy grande: las medias son distintas`, R`\(F\lt 0\): hay que cambiar de test`],
+      why: R`Si las medias fueran todas iguales, la variación entre grupos sería puro azar, del mismo tamaño que la de adentro: el cociente ronda 1.`,
+      steps: [R`Bajo \(H_0\), \(CM_{\text{entre}}\) y \(CM_{\text{dentro}}\) estiman el mismo \(\sigma^2\).`, R`Solo un \(F\) bastante mayor que 1 (por encima del valor crítico) lleva a rechazar \(H_0\).`] },
+    { id: '6-4', type: 'mc', src: 'Parcial 1C 2026 · Tema 2 · ej. 5 (datos)',
+      ctx: R`En la Red de Seguridad, con los puntos de LAL (8 partidos) y GSW (10 partidos), el intervalo del 95 % para \(\sigma^2_{LAL}/\sigma^2_{GSW}\) dio (0,0114 ; 0,2311).`,
+      q: R`¿El guardia de la puerta te deja usar ANOVA para comparar los puntos promedio de LAL y GSW?`,
+      opts: [R`No: el intervalo no contiene a 1, las varianzas son distintas y se rompe la homocedasticidad`, R`Sí: ANOVA no necesita varianzas iguales`, R`Sí: el intervalo es positivo`, R`No: ANOVA solo sirve para 3 o más grupos`],
+      why: R`Las paredes de los departamentos tienen grosores muy distintos (\(S^2\) de 11 contra 229): el guardia no te deja subir. Habría que usar un método que no suponga varianzas iguales.`,
+      steps: [R`Homocedasticidad: \(\sigma^2_{LAL}=\sigma^2_{GSW}\iff\frac{\sigma^2_{LAL}}{\sigma^2_{GSW}}=1\).`, R`\(1\notin(0{,}0114;\ 0{,}2311)\): con 95 % de confianza se descarta que las varianzas sean iguales.`] },
+    { id: '6-5', type: 'num', src: 'Parcial 1C 2026 · Tema 1 · ej. 5 (datos)',
+      ctx: R`Servidores del Tribunal: Tipo A con \(n_1=15\), \(\bar x_1=150\) y \(s_1=12\); Tipo B con \(n_2=13\), \(\bar x_2=158\) y \(s_2=10\).`,
+      q: R`Calculá \(SC_{\text{entre}}=\sum n_j(\bar x_j-\bar x)^2\) (dos decimales).`, ans: 445.71, tol: 0.05,
+      why: R`El micrófono "entre" mide cuánto se aleja la media de cada departamento de la media general, pesado por cuánta gente vive ahí.`,
+      steps: [R`Media general: \(\bar x=\frac{15\cdot150+13\cdot158}{28}=153{,}71\).`, R`\(SC_{\text{entre}}=15(150-153{,}71)^2+13(158-153{,}71)^2=445{,}71\).`, R`Atajo con \(k=2\): \(\frac{n_1n_2}{n_1+n_2}(\bar x_1-\bar x_2)^2=\frac{195}{28}\cdot64=445{,}71\).`] },
+    { id: '6-6', type: 'mc', src: 'Parcial 1C 2026 · Tema 1 · ej. 5 (datos)',
+      ctx: R`Mismos servidores: \(SC_{\text{entre}}=445{,}71\) y \(SC_{\text{dentro}}=14\cdot144+12\cdot100=3216\).`,
+      q: R`¿Cuánto da F y qué decide la Torre con \(\alpha=0{,}05\)?`,
+      opts: [R`\(F=3{,}60\lt F_{0{,}95;\,1,26}=4{,}23\): no se rechaza \(H_0\). Y \(3{,}60=(-1{,}898)^2\), el t del Tribunal`, R`\(F=3{,}60>F_{0{,}95;\,1,26}\): se rechaza \(H_0\)`, R`\(F=0{,}14\): no se rechaza \(H_0\)`, R`\(F=7{,}21\): se rechaza \(H_0\)`],
+      why: R`El portero llega al mismo veredicto que el Tribunal de la sala 5, con el mismo p-valor (0,069): con dos departamentos, ANOVA y el test t son el mismo juicio.`,
+      steps: [R`\(CM_{\text{entre}}=\frac{445{,}71}{1}\) y \(CM_{\text{dentro}}=\frac{3216}{26}=123{,}69\).`, R`\(F=\frac{445{,}71}{123{,}69}=3{,}60\) y \(F_{0{,}95;\,1,26}=4{,}23\).`, R`\(t^2=(-1{,}898)^2=3{,}60=F\) y \(t_{26;\,0{,}975}^2=2{,}056^2=4{,}23=F_{0{,}95;\,1,26}\).`] }
+  ],
+  boss: {
+    name: 'El Guardián de la Torre', emoji: '🗿', source: 'Parcial 1C 2026 · Tema 2 · Ejercicio 4',
+    note: R`El parcial lo resuelve con el test t. Acá lo subís por la Torre (ANOVA con \(k=2\)) y comprobás que da lo mismo.`,
+    statement: R`<p>4) Una empresa de ciberseguridad está evaluando dos algoritmos de cifrado (Algoritmo_X y Algoritmo_Y) para determinar si existe una diferencia en el tiempo de procesamiento (en microsegundos, µs) para un conjunto de datos estándar. Se asume que el tiempo de procesamiento sigue una distribución normal en ambos casos.</p>
+<p>Se selecciona una muestra aleatoria de 16 ejecuciones para el Algoritmo_X y 14 ejecuciones para el Algoritmo_Y, obteniéndose los siguientes resultados:</p>
+<ul><li>Algoritmo X (n<sub>1</sub> = 16): Tiempo promedio \(\bar X_1\)= 205 µs, Desviación estándar muestral s<sub>1</sub> = 15 µs.</li><li>Algoritmo Y (n<sub>2</sub> = 14): Tiempo promedio \(\bar X_2\)= 215 µs, Desviación estándar muestral s<sub>2</sub> = 12 µs.</li></ul>
+<p>a) ¿Existe diferencia significativa entre el tiempo promedio de procesamiento de los dos algoritmos? Utilice un nivel de significación de α=0,05. (15%)</p>
+<p>b) Suponga que la verdadera diferencia entre las medias es de 12 µs (es decir, µ<sub>1</sub> - µ<sub>2</sub> = -12) y que la desviación estándar conjunta es σ<sub>c</sub> = 13,6 µs. Calcule la potencia del test para detectar esta diferencia con el tamaño de muestra y nivel de significación original. (10%)</p>`,
+    steps: [
+      { id: '6-B1', type: 'mc', q: R`Primer golpe: con \(k=2\) algoritmos y \(N=30\) ejecuciones, ¿qué grados de libertad tiene la F?`,
+        opts: [R`\((1;\ 28)\)`, R`\((2;\ 30)\)`, R`\((1;\ 30)\)`, R`\((15;\ 13)\)`],
+        why: R`Dos departamentos: \(k-1=1\). Treinta observaciones menos dos medias: \(N-k=28\).`,
+        steps: [R`Numerador \(k-1=1\); denominador \(N-k=30-2=28\).`, R`\(F_{0{,}95;\,1,28}=4{,}20\).`] },
+      { id: '6-B2', type: 'num', q: R`Segundo golpe: \(SC_{\text{dentro}}=(n_1-1)s_1^2+(n_2-1)s_2^2\)`, ans: 5247, tol: 0.5,
+        why: R`Es el ruido de adentro de cada departamento, sumado.`,
+        steps: [R`\(15\cdot15^2+13\cdot12^2=3375+1872=5247\).`, R`\(CM_{\text{dentro}}=\frac{5247}{28}=187{,}39\), que es la \(S_p^2\) del test t.`] },
+      { id: '6-B3', type: 'num', q: R`Tercer golpe: \(SC_{\text{entre}}\) (dos decimales)`, ans: 746.67, tol: 0.05,
+        why: R`El ruido entre los dos departamentos: cuánto se separa cada media de la media general.`,
+        steps: [R`\(\bar x=\frac{16\cdot205+14\cdot215}{30}=209{,}67\).`, R`\(SC_{\text{entre}}=16(205-209{,}67)^2+14(215-209{,}67)^2=746{,}67\).`, R`Atajo: \(\frac{16\cdot14}{30}(205-215)^2=\frac{224}{30}\cdot100=746{,}67\).`] },
+      { id: '6-B4', type: 'mc', q: R`a) Cuarto golpe: ¿qué decide la Torre con \(\alpha=0{,}05\)?`,
+        opts: [R`\(F=\frac{746{,}67}{187{,}39}=3{,}98\lt 4{,}20\): no se rechaza \(H_0\). No hay diferencia significativa`, R`\(F=3{,}98>3{,}84\): se rechaza \(H_0\)`, R`\(F=0{,}14\lt 4{,}20\): no se rechaza \(H_0\)`, R`\(F=3{,}98\): se rechaza \(H_0\) porque es mayor que 1`],
+        why: R`El portero oye 3,98 veces más ruido entre que dentro, pero no llega a la baranda de 4,20: queda en zona de duda razonable (p-valor 0,056).`,
+        steps: [R`\(F=\frac{CM_{\text{entre}}}{CM_{\text{dentro}}}=\frac{746{,}67/1}{5247/28}=3{,}98\).`, R`\(F_{0{,}95;\,1,28}=4{,}20\): no se rechaza \(H_0\) (p-valor \(=0{,}056\)). El 3,84 es el crítico de \(\chi^2_1\) (\(1{,}96^2\)), no el de \(F_{1;28}\).`] },
+      { id: '6-B5', type: 'mc', q: R`Quinto golpe: ¿cómo se conecta con el test t del inciso a?`,
+        opts: [R`\(t=-1{,}996\) y \(t^2=3{,}98=F\): mismo veredicto y mismo p-valor`, R`No tienen relación: ANOVA y t pueden dar decisiones opuestas`, R`\(F=2t\)`, R`\(F=\sqrt{|t|}\)`],
+        why: R`Con dos poblaciones, la Torre y el Tribunal son el mismo juicio: \(F_{1;\nu}=t_\nu^2\), como viste en el Bosque.`,
+        steps: [R`\(t=\frac{205-215}{\sqrt{187{,}39\left(\frac1{16}+\frac1{14}\right)}}=\frac{-10}{5{,}010}=-1{,}996\).`, R`\(t^2=3{,}98=F\) y \(t_{28;\,0{,}975}^2=2{,}048^2=4{,}20=F_{0{,}95;\,1,28}\).`] },
+      { id: '6-B6', type: 'mc', q: R`b) Golpe final: la potencia para detectar \(\mu_1-\mu_2=-12\) con \(\sigma_c=13{,}6\)`,
+        opts: [R`\(\approx0{,}67\)`, R`\(\approx0{,}33\)`, R`\(\approx0{,}05\)`, R`\(\approx0{,}90\)`],
+        why: R`Es la lupa del Tribunal: baranda puesta con \(H_0\), probabilidad calculada con la verdad (−12) y \(\sigma_c\) como conocida (Z).`,
+        steps: [R`\(\sigma_{\bar x_1-\bar x_2}=13{,}6\sqrt{\frac1{16}+\frac1{14}}=4{,}977\); barandas en \(\pm1{,}96\cdot4{,}977=\pm9{,}75\).`, R`Potencia \(=P\left(Z\lt\frac{-9{,}75+12}{4{,}977}\right)+P\left(Z>\frac{9{,}75+12}{4{,}977}\right)=P(Z\lt 0{,}45)+P(Z>4{,}37)\).`, R`\(=0{,}674+0{,}000\approx0{,}67\).`] }
+    ]
+  }
+});
+</script>
+<script>
+/* ============ MOTOR DEL JUEGO ============ */
+(function () {
+  'use strict';
+  var LV = window.PALACIO.levels;
+  var app = document.getElementById('app');
+  var live = document.getElementById('live');
+  var KEY = 'palacio-estadistico:v1';
+  var THEME_KEY = 'palacio-estadistico:tema';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function $(s, el) { return (el || document).querySelector(s); }
+  function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+
+  /* ---------- Progreso (localStorage con respaldo en memoria) ---------- */
+  var memSave = null;
+  function blank() { return { done: {}, xp: 0, best: {} }; }
+  function load() {
+    try { var raw = localStorage.getItem(KEY); if (raw) return JSON.parse(raw); } catch (e) {}
+    return memSave;
+  }
+  function persist() {
+    memSave = save;
+    try { localStorage.setItem(KEY, JSON.stringify(save)); } catch (e) {}
+  }
+  var save = Object.assign(blank(), load() || {});
+  var streak = 0;
+  var run = null;
+  var lastMissed = [];
+
+  /* ---------- Utilidades ---------- */
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function fmtNum(x) { return Number(x).toLocaleString('es-AR', { maximumFractionDigits: 4 }); }
+  function level(id) { for (var i = 0; i < LV.length; i++) if (LV[i].id === id) return LV[i]; return null; }
+  function isUnlocked(id) { return id === 1 || !!save.done[id - 1] || !!save.done[id]; }
+  function hue(id) { return 'var(--h' + id + ')'; }
+  function say(msg) { live.textContent = ''; setTimeout(function () { live.textContent = msg; }, 40); }
+  function doneCount() { var n = 0; LV.forEach(function (l) { if (save.done[l.id]) n++; }); return n; }
+  function nextLevel() { for (var i = 0; i < LV.length; i++) if (!save.done[LV[i].id]) return LV[i]; return null; }
+  function paintStats() { $('#xp').textContent = save.xp; $('#streak').textContent = streak; }
+  function setTitle(t) { document.title = t ? t + ' | Palacio Estadístico' : 'Palacio Estadístico'; }
+  function toTop() { window.scrollTo(0, 0); }
+
+  /* ---------- MathJax ---------- */
+  var pending = [];
+  function typeset(el) {
+    if (window.__mjReady && window.MathJax && MathJax.typesetPromise) {
+      return MathJax.typesetPromise([el]).then(function () { fitMath(el); }).catch(function (err) { console.warn('MathJax', err); });
+    }
+    pending.push(el);
+    return Promise.resolve();
+  }
+  /* Una fórmula en línea que no entra en el ancho disponible pasa a ser una franja con scroll propio,
+     así la página nunca se desborda en un celular angosto. */
+  function blockWidth(node) {
+    var b = node.parentElement;
+    while (b && b !== document.body && getComputedStyle(b).display.indexOf('inline') === 0) b = b.parentElement;
+    if (!b) return 0;
+    var cs = getComputedStyle(b);
+    return b.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  }
+  function fitMath(root) {
+    var list = $$('mjx-container:not([display="true"])', root || app);
+    list.forEach(function (c) { c.classList.remove('mjx-wide'); });
+    list.forEach(function (c) {
+      var w = c.getBoundingClientRect().width;
+      var avail = blockWidth(c);
+      if (w && avail && w > avail + 1) c.classList.add('mjx-wide');
+    });
+  }
+  var fitTimer = null;
+  window.addEventListener('resize', function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitMath(app); }, 150); });
+  app.addEventListener('toggle', function (e) { if (e.target.open) fitMath(e.target); }, true);
+  document.addEventListener('mj-ready', function () {
+    var list = pending; pending = [];
+    list.forEach(function (el) { if (el.isConnected) typeset(el); });
+  });
+  function clearMath() { if (window.__mjReady && window.MathJax && MathJax.typesetClear) MathJax.typesetClear(); }
+  /* MathJax 3 no corta las fórmulas en línea. Partimos cada \( ... \) en sus relaciones de primer nivel
+     (=, \Rightarrow, \lt, \le, \approx...) en piezas contiguas con un <wbr> entre ellas: el navegador corta
+     la línea ahí, como haría TeX. Nada se corta dentro de llaves ni de \left ... \right. */
+  var REL = /^(?:\\Rightarrow|\\iff|\\approx|\\le(?![a-zA-Z])|\\ge(?![a-zA-Z])|\\lt(?![a-zA-Z])|\\gt(?![a-zA-Z])|\\ne(?![a-zA-Z])|\\mid(?![a-zA-Z])|\\sim(?![a-zA-Z])|\\in(?![a-zA-Z])|\\notin(?![a-zA-Z]))/;
+  function splitTex(tex) {
+    var parts = [], cur = '', depth = 0, lr = 0, i = 0;
+    while (i < tex.length) {
+      var ch = tex.charAt(i);
+      if (ch === '\\') {
+        var rest = tex.slice(i);
+        var rel = REL.exec(rest);
+        if (rel && depth === 0 && lr === 0 && cur.trim()) { parts.push(cur + rel[0] + '{}'); cur = ''; i += rel[0].length; continue; }
+        var cmd = /^\\(?:[a-zA-Z]+|.)/.exec(rest)[0];
+        if (cmd === '\\left') lr++;
+        else if (cmd === '\\right') lr--;
+        cur += cmd; i += cmd.length; continue;
+      }
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      else if ((ch === '=' || ch === '>') && depth === 0 && lr === 0 && cur.trim()) { parts.push(cur + ch + '{}'); cur = ''; i++; continue; }
+      else if ((ch === '+' || ch === '-') && depth === 0 && lr === 0) {
+        /* Solo un + o − binario (después de un número, un paréntesis, una llave o una variable suelta).
+           Como en TeX, el corte va después del signo: el signo queda al final de la línea. */
+        var tail = cur.replace(/\s+$/, '');
+        if (/[0-9)}\]]$/.test(tail) || (/[A-Za-z]$/.test(tail) && !/\\[A-Za-z]+$/.test(tail))) { parts.push(cur + ch + '{}'); cur = ''; i++; continue; }
+      }
+      cur += ch; i++;
+    }
+    parts.push(cur);
+    return parts;
+  }
+  function brk(html) {
+    return String(html).replace(/\\\(([\s\S]*?)\\\)/g, function (_, tex) {
+      var p = splitTex(tex);
+      return p.length < 2 ? '\\(' + tex + '\\)' : p.map(function (x) { return '\\(' + x + '\\)'; }).join('<wbr>');
+    });
+  }
+  function paint(html, focusSel) {
+    clearMath();
+    app.innerHTML = brk(html);
+    toTop();
+    typeset(app);
+    var f = focusSel && $(focusSel, app);
+    if (f) { if (!f.hasAttribute('tabindex')) f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); }
+  }
+
+  /* ---------- Tema claro / oscuro ---------- */
+  var themeBtn = $('#themeBtn');
+  function currentTheme() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t) return t;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function paintThemeBtn() {
+    var dark = currentTheme() === 'dark';
+    themeBtn.textContent = dark ? '☀️' : '🌙';
+    themeBtn.setAttribute('aria-label', dark ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro');
+  }
+  themeBtn.addEventListener('click', function () {
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    paintThemeBtn();
+  });
+  paintThemeBtn();
+
+  /* ---------- Diálogo de confirmación ---------- */
+  var dlg = $('#dlg');
+  function ask(title, text, yesLabel, danger) {
+    return new Promise(function (resolve) {
+      if (!dlg || typeof dlg.showModal !== 'function') { resolve(window.confirm(title + '\n\n' + text)); return; }
+      var settled = false;
+      var yes = $('#dlgYes'), no = $('#dlgNo');
+      $('#dlgTitle').textContent = title;
+      $('#dlgText').textContent = text;
+      yes.textContent = yesLabel;
+      yes.className = 'btn' + (danger ? ' btn-bad' : '');
+      function finish(v) { if (settled) return; settled = true; if (dlg.open) dlg.close(); resolve(v); }
+      yes.onclick = function () { finish(true); };
+      no.onclick = function () { finish(false); };
+      dlg.onclose = function () { finish(false); };
+      dlg.showModal();
+      no.focus();
+    });
+  }
+
+  /* ---------- Mapa del palacio ---------- */
+  function renderMap() {
+    run = null;
+    setTitle('');
+    var n = doneCount();
+    var nx = nextLevel();
+    var rooms = LV.map(function (L) {
+      var done = !!save.done[L.id];
+      var open = isUnlocked(L.id);
+      var now = nx && nx.id === L.id;
+      var chip = done ? '<span class="chip chip-done">👑 Superada · mejor ' + (save.best[L.id] || 0) + ' %</span>'
+        : now && open ? '<span class="chip chip-now">Te toca</span>'
+        : open ? '<span class="chip">Abierta</span>'
+        : '<span class="chip">🔒 Cerrada</span>';
+      if (L.warn) chip += ' <span class="chip">Extra</span>';
+      var status = done ? 'superada' : open ? 'abierta' : 'cerrada';
+      return '<li class="room-item' + (open ? '' : ' is-locked') + '" style="--hue:' + hue(L.id) + '">' +
+        '<button class="room-node" type="button" data-room="' + L.id + '">' +
+        '<span class="node" aria-hidden="true">' + L.emoji + (done ? '<span class="badge">👑</span>' : '') + '</span>' +
+        '<span class="room-text"><b>Sala ' + L.id + ' · ' + L.name + '</b><span class="topic">' + L.topic + '</span>' + chip + '<span class="sr-only"> Estado: ' + status + '.</span></span>' +
+        '</button></li>';
+    }).join('');
+    var cta = nx ? '▶️ Seguir: Sala ' + nx.id + ' · ' + nx.name : '🔁 Repasar desde la Sala 1';
+    var html =
+      '<section class="hero stack">' +
+        '<p class="kicker">Recuperatorio · 1er parcial · Análisis Estadístico II</p>' +
+        '<h1>El Palacio Estadístico</h1>' +
+        '<p class="muted">Seis salas, una por tema. Cada sala tiene una historia para recordar las fórmulas, preguntas cortas y un jefe final: un ejercicio real de los parciales de la cátedra Lasanta.</p>' +
+        '<div><div class="bar-label"><span>Recorrido del palacio</span><span>' + n + ' de ' + LV.length + ' salas</span></div>' +
+        '<div class="bar" role="progressbar" aria-label="Salas superadas" aria-valuemin="0" aria-valuemax="' + LV.length + '" aria-valuenow="' + n + '"><i style="width:' + Math.round(100 * n / LV.length) + '%"></i></div></div>' +
+        '<button class="btn btn-block" type="button" data-act="continue">' + cta + '</button>' +
+      '</section>' +
+      '<ol class="path" aria-label="Salas del palacio">' + rooms + '</ol>' +
+      '<section class="card faq stack" style="margin-top:48px">' +
+        '<h2>Preguntas frecuentes</h2>' +
+        faq('¿Los ejercicios son reales?', 'Sí. Cada jefe es un ejercicio de los parciales del 1er cuatrimestre 2026 (Temas 1, 2 y B), copiado tal cual figura en la hoja, con sus erratas. La mayoría de las preguntas salen de las Prácticas 1 a 5, de los Ejercicios de Estimadores y de FGM y de la Ejercitación de potencia del test. Cada pregunta dice de dónde sale; las que dicen «Concepto» o «Práctica de la Torre» son nuestras.') +
+        faq('¿Cómo se juega?', 'Elegí una opción o escribí el número y tocá Comprobar. Si acertás, sumás puntos y seguís. Si fallás, ves la resolución paso a paso y esa pregunta vuelve al final de la sala. La sala se supera cuando vencés al jefe.') +
+        faq('¿Cómo escribo los números?', 'Con coma decimal y sin separador de miles: 24,25 o -1,9. También acepta el punto decimal (24.25).') +
+        faq('¿Por qué la Sala 6 dice «Extra»?', 'ANOVA no aparece en el material del 1er parcial que está en la carpeta (Prácticas 1 a 5 y parciales Temas 1, 2 y B). La Torre usa datos reales del parcial para mostrar que el ANOVA con dos poblaciones es el mismo test t. Para el recuperatorio, priorizá las salas 1 a 5.') +
+        faq('¿Dónde se guarda mi progreso?', 'Solo en este navegador. No hay cuentas, cookies ni analítica. En otro dispositivo arrancás de cero. Lo podés borrar acá abajo.') +
+        faq('¿Hay atajos de teclado?', 'Sí: las teclas 1 a 4 eligen una opción y Enter comprueba y continúa.') +
+      '</section>' +
+      '<section class="card stack" style="margin-top:24px">' +
+        '<h2>Tu progreso</h2>' +
+        '<p class="muted">' + save.xp + ' puntos y ' + n + ' de ' + LV.length + ' salas superadas, guardados solo en este navegador.</p>' +
+        '<button class="btn btn-bad" type="button" data-act="reset">🗑️ Borrar mi progreso</button>' +
+      '</section>';
+    paint(html);
+  }
+  function faq(q, a) { return '<details><summary>' + q + '</summary><div><p>' + a + '</p></div></details>'; }
+
+  /* ---------- Sala (historia + llaves) ---------- */
+  function renderRoom(id) {
+    run = null;
+    var L = level(id);
+    setTitle('Sala ' + id + ' · ' + L.name);
+    var html =
+      '<a class="back" href="#/">← Volver al palacio</a>' +
+      '<div class="stack" style="--hue:' + hue(id) + '">' +
+        '<header class="room-head"><span class="node" aria-hidden="true">' + L.emoji + '</span>' +
+          '<div><p class="kicker">Sala ' + id + ' de ' + LV.length + '</p><h1>' + L.name + '</h1><p class="muted">' + L.topic + '</p></div></header>' +
+        (L.warn ? '<p class="warn">⚠️ ' + L.warn + '</p>' : '') +
+        '<section class="card scene"><h2 class="kicker">La historia de la sala</h2><dl style="margin-top:16px">' +
+          '<div><dt>📍 Dónde estás</dt><dd>' + L.scene.donde + '</dd></div>' +
+          '<div><dt>👀 Qué ves</dt><dd>' + L.scene.ves + '</dd></div>' +
+          '<div><dt>🔑 De qué se trata</dt><dd>' + L.scene.trata + '</dd></div>' +
+        '</dl></section>' +
+        '<section class="card keys"><h2>🗝️ Llaves de la sala</h2><ul>' + L.keys.map(function (k) { return '<li>' + k + '</li>'; }).join('') + '</ul></section>' +
+        '<div class="btn-row">' +
+          '<button class="btn" type="button" data-act="start">🚪 Entrar a la sala (' + L.questions.length + ' preguntas + jefe)</button>' +
+          '<button class="btn btn-ghost" type="button" data-act="boss">⚔️ Ir directo al jefe</button>' +
+        '</div>' +
+      '</div>';
+    paint(html, 'h1');
+  }
+
+  /* ---------- Partida ---------- */
+  function startRun(id, mode, list) {
+    var L = level(id);
+    var queue = mode === 'review' ? list.slice() : mode === 'boss' ? L.boss.steps.slice() : L.questions.slice();
+    run = {
+      L: L, mode: mode, phase: mode === 'full' ? 'est' : mode, queue: queue, pos: 0, total: queue.length,
+      solved: {}, missed: [], missedIds: {}, firstOk: 0, uniq: 0, xp: 0, answered: false, order: null
+    };
+    renderQuestion();
+  }
+  function phaseLabel() {
+    return run.phase === 'boss' ? 'Jefe · ' + run.L.boss.name : run.phase === 'review' ? 'Repaso de errores' : 'Estaciones';
+  }
+  function solvedInPhase() {
+    var n = 0, seen = {};
+    run.queue.forEach(function (q) { if (run.solved[q.id] && !seen[q.id]) { seen[q.id] = 1; n++; } });
+    return n;
+  }
+  function hpHtml() {
+    var steps = run.L.boss.steps, left = 0;
+    steps.forEach(function (s) { if (!run.solved[s.id]) left++; });
+    var hearts = '';
+    for (var i = 0; i < steps.length; i++) hearts += i < left ? '❤️' : '🖤';
+    return '<div class="hp" role="img" aria-label="Vida del jefe: ' + left + ' de ' + steps.length + '">' + hearts + '</div>';
+  }
+
+  function renderQuestion() {
+    var q = run.queue[run.pos];
+    var L = run.L;
+    run.answered = false;
+    setTitle('Sala ' + L.id + ' · ' + L.name);
+    var solved = solvedInPhase();
+    var pct = Math.round(100 * solved / run.total);
+    var isBoss = run.phase === 'boss';
+    var head =
+      '<div class="play-top"><button class="icon-btn" type="button" data-act="quit" aria-label="Salir de la sala">✕</button>' +
+      '<div class="bar" role="progressbar" aria-label="' + (isBoss ? 'Golpes al jefe' : 'Avance de la sala') + '" aria-valuemin="0" aria-valuemax="' + run.total + '" aria-valuenow="' + solved + '">' +
+      '<i style="width:' + pct + '%;' + (isBoss ? 'background:var(--bad)' : '') + '"></i></div></div>' +
+      '<p class="phase"><span>Sala ' + L.id + ' · ' + phaseLabel() + '</span><span>' + solved + ' de ' + run.total + '</span></p>';
+    var bossBits = isBoss ?
+      '<div class="boss-card" style="margin-top:16px"><span class="boss-emoji" id="bossEmoji" aria-hidden="true">' + L.boss.emoji + '</span>' + hpHtml() + '</div>' +
+      '<details class="stmt-mini"><summary>📜 Enunciado del jefe (' + L.boss.source + ')</summary><div class="scroll-stmt">' + L.boss.statement + '</div></details>' : '';
+    var body;
+    if (q.type === 'mc') {
+      run.order = shuffle(q.opts.map(function (_, i) { return i; }));
+      body = '<div class="opts" role="radiogroup" aria-labelledby="qtext">' + run.order.map(function (oi, k) {
+        return '<label class="opt" data-oi="' + oi + '"><input class="sr-only" type="radio" name="opt" value="' + oi + '">' +
+          '<span class="k">' + (k + 1) + '</span><span class="t">' + q.opts[oi] + '</span></label>';
+      }).join('') + '</div>';
+    } else {
+      run.order = null;
+      body = '<div class="num-wrap"><label for="numIn">Tu respuesta</label>' +
+        '<div class="num-row"><input id="numIn" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="Ej.: 24,25" aria-describedby="numHint numErr"></div>' +
+        '<p class="hint" id="numHint">' + (q.hint ? q.hint + ' ' : '') + 'Usá coma decimal y sin separador de miles.</p>' +
+        '<p class="field-err" id="numErr" hidden></p></div>';
+    }
+    var html = head + bossBits +
+      '<article class="card" style="margin-top:16px;--hue:' + hue(L.id) + '">' +
+        (q.src ? '<span class="src">📄 ' + q.src + '</span>' : '<span class="src">⚔️ ' + L.boss.source + '</span>') +
+        (q.ctx ? '<p style="margin-top:12px">' + q.ctx + '</p>' : '') +
+        '<h1 class="qtext" id="qtext" tabindex="-1">' + q.q + '</h1>' +
+        body +
+        '<div id="fb" aria-live="polite"></div>' +
+      '</article>' +
+      '<div class="actionbar"><button class="btn btn-block" type="button" id="checkBtn" data-act="check" disabled>Comprobar</button></div>';
+    paint(html, '#qtext');
+    if (q.type === 'mc') {
+      $$('.opt input', app).forEach(function (inp) {
+        inp.addEventListener('change', function () {
+          $$('.opt', app).forEach(function (o) { o.classList.toggle('is-sel', o.contains(inp) && inp.checked); });
+          $('#checkBtn').disabled = false;
+        });
+      });
+    } else {
+      var inp = $('#numIn');
+      inp.addEventListener('input', function () {
+        $('#checkBtn').disabled = inp.value.trim() === '';
+        inp.removeAttribute('aria-invalid');
+        $('#numErr').hidden = true;
+      });
+    }
+  }
+
+  function parseNums(raw) {
+    var s = String(raw).trim().replace(/\s+/g, '').replace(/−/g, '-');
+    var out = [];
+    function push(v) { var x = Number(v); if (v !== '' && isFinite(x)) out.push(x); }
+    if (!s) return out;
+    var dot = s.indexOf('.') >= 0, comma = s.indexOf(',') >= 0;
+    if (dot && comma) {
+      if (s.lastIndexOf(',') > s.lastIndexOf('.')) push(s.replace(/\./g, '').replace(',', '.'));
+      else push(s.replace(/,/g, ''));
+    } else if (comma) {
+      push(s.replace(',', '.'));
+      if (/^-?\d{1,3}(,\d{3})+$/.test(s)) push(s.replace(/,/g, ''));
+    } else if (dot) {
+      push(s);
+      if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) push(s.replace(/\./g, ''));
+    } else push(s);
+    return out;
+  }
+
+  function check() {
+    if (!run || run.answered) return;
+    var q = run.queue[run.pos];
+    var ok;
+    if (q.type === 'mc') {
+      var picked = $('.opt input:checked', app);
+      if (!picked) return;
+      ok = Number(picked.value) === 0;
+      $$('.opt', app).forEach(function (o) {
+        var oi = Number(o.getAttribute('data-oi'));
+        o.classList.add('is-locked');
+        o.querySelector('input').disabled = true;
+        if (oi === 0) { o.classList.add('is-ok'); o.querySelector('.k').textContent = '✓'; }
+        else if (o.contains(picked)) { o.classList.add('is-bad'); o.querySelector('.k').textContent = '✗'; }
+      });
+    } else {
+      var inp = $('#numIn');
+      var cands = parseNums(inp.value);
+      if (!cands.length) {
+        inp.setAttribute('aria-invalid', 'true');
+        var err = $('#numErr');
+        err.textContent = 'Escribí solo un número, por ejemplo 24,25 o -1,9.';
+        err.hidden = false;
+        inp.focus();
+        return;
+      }
+      ok = cands.some(function (v) { return Math.abs(v - q.ans) <= q.tol + 1e-9; });
+      inp.readOnly = true;
+      inp.style.borderColor = ok ? 'var(--ok)' : 'var(--bad)';
+    }
+    run.answered = true;
+    var first = !run.missedIds[q.id] && !run.solved[q.id];
+    if (!run.solved[q.id] && !run.missedIds[q.id]) run.uniq++;
+    if (ok) {
+      run.solved[q.id] = true;
+      if (first) run.firstOk++;
+      var gain = run.phase === 'boss' ? (first ? 15 : 8) : (first ? 10 : 5);
+      run.xp += gain; save.xp += gain; streak++;
+      persist();
+      if (run.phase === 'boss') {
+        var be = $('#bossEmoji');
+        if (be && !reduceMotion) { be.classList.remove('hit'); void be.offsetWidth; be.classList.add('hit'); }
+        var hp = $('.hp', app);
+        if (hp) hp.outerHTML = hpHtml();
+      }
+    } else {
+      streak = 0;
+      if (!run.missedIds[q.id]) { run.missedIds[q.id] = true; run.missed.push(q); }
+      run.queue.push(q);
+    }
+    paintStats();
+    var fb = $('#fb');
+    fb.className = 'fb ' + (ok ? 'ok' : 'bad');
+    fb.innerHTML = brk(
+      '<h2>' + (ok ? '✅ ¡Correcto!' : '❌ Todavía no') + '</h2>' +
+      (ok ? '' : '<p class="right">Respuesta correcta: ' + (q.type === 'num' ? fmtNum(q.ans) : q.opts[0]) + '</p>') +
+      '<p class="why">🏛️ ' + q.why + '</p>' +
+      '<details' + (ok ? '' : ' open') + '><summary>' + (ok ? 'Ver la resolución' : 'Resolución paso a paso') + '</summary>' +
+      '<ol class="steps">' + q.steps.map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol></details>' +
+      (ok ? '' : '<p class="small muted" style="margin-top:8px">🔁 Esta pregunta vuelve al final de la sala.</p>'));
+    typeset(fb);
+    say(ok ? 'Correcto.' : 'Incorrecto. Se muestra la resolución.');
+    var btn = $('#checkBtn');
+    btn.textContent = 'Continuar';
+    btn.setAttribute('data-act', 'next');
+    btn.disabled = false;
+    btn.className = 'btn btn-block ' + (ok ? 'btn-ok' : 'btn-bad');
+    btn.focus({ preventScroll: true });
+    fb.scrollIntoView({ block: 'nearest', behavior: reduceMotion ? 'instant' : 'smooth' });
+  }
+
+  function advance() {
+    run.pos++;
+    if (run.pos < run.queue.length) { renderQuestion(); return; }
+    if (run.phase === 'est') { renderBossIntro(); return; }
+    finish();
+  }
+
+  function renderBossIntro() {
+    var L = run.L;
+    run.phase = 'boss-intro';
+    var html =
+      '<div class="play-top"><button class="icon-btn" type="button" data-act="quit" aria-label="Salir de la sala">✕</button>' +
+      '<div class="bar" aria-hidden="true"><i style="width:100%"></i></div></div>' +
+      '<section class="card boss-card" style="margin-top:24px;--hue:' + hue(L.id) + '">' +
+        '<p class="kicker">Jefe de la sala</p>' +
+        '<div class="boss-emoji" aria-hidden="true">' + L.boss.emoji + '</div>' +
+        '<h1 style="font-size:28px;margin-top:8px">' + L.boss.name + '</h1>' +
+        '<p style="margin-top:8px"><span class="src">📜 Ejercicio real · ' + L.boss.source + '</span></p>' +
+        (L.boss.note ? '<p class="muted" style="margin-top:8px">' + L.boss.note + '</p>' : '') +
+        '<div class="hp" role="img" aria-label="Vida del jefe: ' + L.boss.steps.length + ' golpes">' + new Array(L.boss.steps.length + 1).join('❤️') + '</div>' +
+        '<div class="scroll-stmt">' + L.boss.statement + '</div>' +
+        '<p class="muted small" style="margin-top:16px">Leelo como en el parcial. Lo vas a resolver de a un golpe por vez; el enunciado queda a mano arriba de cada pregunta.</p>' +
+      '</section>' +
+      '<div class="actionbar"><button class="btn btn-block" type="button" data-act="fight">⚔️ Empezar el combate</button></div>';
+    paint(html, 'h1');
+  }
+  function startBoss() {
+    run.phase = 'boss';
+    run.queue = run.L.boss.steps.slice();
+    run.pos = 0;
+    run.total = run.queue.length;
+    renderQuestion();
+  }
+
+  function finish() {
+    var L = run.L;
+    var pct = run.uniq ? Math.round(100 * run.firstOk / run.uniq) : 100;
+    var review = run.mode === 'review';
+    if (!review) {
+      save.done[L.id] = true;
+      save.best[L.id] = Math.max(save.best[L.id] || 0, pct);
+      persist();
+    }
+    lastMissed = run.missed.slice();
+    var nx = L.id < LV.length ? level(L.id + 1) : null;
+    var missedHtml = lastMissed.length ?
+      '<h2 style="margin-top:24px;font-size:20px">Para repasar</h2><ul class="missed">' +
+      lastMissed.map(function (q) { return '<li><b>' + (q.src || L.boss.source) + ':</b> ' + q.q + '</li>'; }).join('') + '</ul>' : '';
+    var html =
+      '<section class="card result stack" style="--hue:' + hue(L.id) + '">' +
+        '<div class="big" aria-hidden="true">' + (review ? '📚' : '👑') + '</div>' +
+        '<h1>' + (review ? 'Repaso terminado' : '¡Sala superada!') + '</h1>' +
+        '<p class="muted">' + (review ? 'Volviste a resolver lo que habías fallado en ' + L.name + '.' : 'Venciste a ' + L.boss.name + ' en ' + L.name + '.') + '</p>' +
+        '<div class="kpis"><div class="kpi"><b>' + pct + ' %</b><span>acertadas al primer intento</span></div>' +
+        '<div class="kpi"><b>+' + run.xp + '</b><span>puntos de experiencia</span></div></div>' +
+        missedHtml +
+        '<div class="btn-row" style="margin-top:24px">' +
+          (nx && !review ? '<button class="btn" type="button" data-act="nextroom">Siguiente sala: ' + nx.name + ' →</button>' : '') +
+          (lastMissed.length ? '<button class="btn btn-ghost" type="button" data-act="review">🔁 Repasar las que fallé (' + lastMissed.length + ')</button>' : '') +
+          '<button class="btn btn-ghost" type="button" data-act="map">🏛️ Volver al palacio</button>' +
+        '</div>' +
+      '</section>';
+    run.phase = 'done';
+    paint(html, 'h1');
+    paintStats();
+    say(review ? 'Repaso terminado.' : 'Sala superada.');
+    if (!review) confetti();
+  }
+
+  function confetti() {
+    if (reduceMotion) return;
+    var box = document.createElement('div');
+    box.className = 'confetti';
+    box.setAttribute('aria-hidden', 'true');
+    var set = ['🎉', '⭐', '👑', '✨', '🏛️'];
+    for (var i = 0; i < 26; i++) {
+      var s = document.createElement('span');
+      s.textContent = set[i % set.length];
+      s.style.left = Math.round(Math.random() * 100) + '%';
+      s.style.animationDelay = Math.round(Math.random() * 500) + 'ms';
+      box.appendChild(s);
+    }
+    document.body.appendChild(box);
+    setTimeout(function () { box.remove(); }, 2400);
+  }
+
+  /* ---------- Rutas y eventos ---------- */
+  function route() {
+    var parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+    if (parts[0] === 'sala') {
+      var id = Number(parts[1]);
+      if (level(id)) {
+        if (parts[2] === 'juego') { startRun(id, 'full'); return; }
+        if (parts[2] === 'jefe') { startRun(id, 'boss'); return; }
+        renderRoom(id);
+        return;
+      }
+    }
+    renderMap();
+  }
+  function go(hash) { if (location.hash === hash) route(); else location.hash = hash; }
+
+  app.addEventListener('click', function (e) {
+    var room = e.target.closest('[data-room]');
+    if (room) {
+      var id = Number(room.getAttribute('data-room'));
+      if (isUnlocked(id)) { go('#/sala/' + id); return; }
+      ask('Esta sala todavía está cerrada', 'Se abre al vencer al jefe de la Sala ' + (id - 1) + '. Podés entrar igual para practicar este tema.', 'Entrar igual', false)
+        .then(function (yes) { if (yes) go('#/sala/' + id); });
+      return;
+    }
+    var el = e.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.getAttribute('data-act');
+    var cur = run && run.L ? run.L.id : null;
+    var roomId = Number((location.hash.match(/sala\/(\d+)/) || [])[1]) || cur;
+    if (act === 'continue') { var nx = nextLevel(); go('#/sala/' + (nx ? nx.id : 1)); }
+    else if (act === 'start') go('#/sala/' + roomId + '/juego');
+    else if (act === 'boss') go('#/sala/' + roomId + '/jefe');
+    else if (act === 'check') check();
+    else if (act === 'next') advance();
+    else if (act === 'fight') startBoss();
+    else if (act === 'map') go('#/');
+    else if (act === 'nextroom') go('#/sala/' + (cur + 1));
+    else if (act === 'review') { if (lastMissed.length) startRun(cur, 'review', lastMissed); }
+    else if (act === 'quit') {
+      ask('¿Salir de la sala?', 'Vas a perder el avance de esta partida. Los puntos que ya ganaste quedan guardados.', 'Salir', false)
+        .then(function (yes) { if (yes) go('#/sala/' + cur); });
+    } else if (act === 'reset') {
+      ask('¿Borrar tu progreso?', 'Se borran las salas superadas, los puntos y los mejores resultados guardados en este navegador. No se puede deshacer.', 'Borrar', true)
+        .then(function (yes) {
+          if (!yes) return;
+          save = blank(); memSave = null; streak = 0;
+          try { localStorage.removeItem(KEY); } catch (e) {}
+          paintStats();
+          renderMap();
+          say('Progreso borrado.');
+        });
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!run || e.altKey || e.ctrlKey || e.metaKey || (dlg && dlg.open)) return;
+    var tag = (e.target.tagName || '').toLowerCase();
+    if (/^[1-4]$/.test(e.key) && !run.answered && tag !== 'input' || (/^[1-4]$/.test(e.key) && e.target.type === 'radio' && !run.answered)) {
+      var opts = $$('.opt input', app);
+      var inp = opts[Number(e.key) - 1];
+      if (inp && !inp.disabled) { inp.checked = true; inp.dispatchEvent(new Event('change', { bubbles: true })); inp.focus(); e.preventDefault(); }
+      return;
+    }
+    if (e.key === 'Enter') {
+      if (tag === 'button' || tag === 'a' || tag === 'summary') return;
+      var btn = $('#checkBtn') || $('[data-act="fight"]');
+      if (btn && !btn.disabled) { e.preventDefault(); btn.click(); }
+    }
+  });
+
+  window.addEventListener('hashchange', route);
+  var splash = $('.splash');
+  if (splash) setTimeout(function () { splash.remove(); }, 1300);
+  paintStats();
+  route();
+
+  /* Gancho para pruebas automáticas (no afecta el juego). */
+  window.__palacio = {
+    levels: LV,
+    current: function () { return run && run.queue[run.pos]; },
+    state: function () { return run ? { level: run.L.id, phase: run.phase, pos: run.pos, queue: run.queue.length, answered: run.answered } : null; },
+    save: function () { return JSON.parse(JSON.stringify(save)); }
+  };
+})();
+</script>
+</body>
+</html>
