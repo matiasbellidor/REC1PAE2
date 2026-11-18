@@ -111,6 +111,6 @@ Algunas reglas para no romper nada:
 
 ## Autor
 
-Creado por **Matias Rodrigo Bellido**, estudiante de Ciencias Actuariales en la FCE-UBA. [Conectá conmigo en LinkedIn](https://www.linkedin.com/in/matiasbellido/).
+Creado por **Matias Rodrigo Bellido**, estudiante de Ciencias Actuariales en la FCE-UBA. [Conectá conmigo en LinkedIn](https://www.linkedin.com/in/matiasbellido/) o escribime tus consultas a rbellidomatias@gmail.com.
 
 © 2026 Matias Rodrigo Bellido. Todos los derechos reservados.
