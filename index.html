@@ -547,8 +547,13 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .cr-actions > .pill-app { flex: 0 1 300px; min-width: 0; }
 @media (max-width: 559px) { .cr-actions > .pill-app { flex: 1 1 100%; } }
 .pill-gap { width: 34px; flex: 0 1 34px; }
-/* Logo PNG de LinkedIn tal cual (sin círculo blanco): un borde fino lo recorta sobre el azul del botón */
-.pill-app .pill-logo { flex: none; width: 34px; height: 34px; border-radius: 7px; box-shadow: 0 0 0 1.5px rgba(255, 255, 255, .7), 0 2px 6px rgba(0, 0, 0, .22); }
+/* Logo PNG de LinkedIn entero y tal cual (regla de Matías): sin círculo, sin recuadro ni borde blanco y sin recortar
+   (el PNG ya trae sus esquinas redondeadas). Una sombra oscura suave lo separa del azul del botón. */
+.pill-app .pill-logo { flex: none; width: 34px; height: 34px; border-radius: 0; object-fit: contain; box-shadow: none; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .45)); }
+.accion__icono--logo { border-radius: 0; overflow: visible; background: none; box-shadow: none; }
+.accion__icono--logo img { width: 36px; height: 36px; object-fit: contain; }
+/* El ícono de Bellido Asesoramientos va a la izquierda de la marca */
+.brand-wrap { gap: var(--s3); }
 .foot-info p { margin-left: auto; margin-right: auto; }
 
 /* ============ CALCULADORA TEMPORAL ============ */
@@ -718,8 +723,8 @@ a.mini-tag { min-height: 32px; padding: 0 var(--s3); font-size: 14px; }
 <header class="top">
   <div class="top-row">
     <div class="brand-wrap">
-      <a class="brand" href="#/teoria"><img class="emo" src="emojis/classical-building.webp" alt="" width="160" height="160" data-emoji="classical-building"><span class="brand-txt"><span class="brand-name">Palacio<span class="bn-long"> Estadístico</span></span><span class="brand-sub">AE II · Recuperatorio 1P</span></span></a>
       <button class="creator-btn" id="creatorBtn" type="button" popovertarget="creatorMenu" aria-haspopup="dialog" aria-expanded="false" aria-label="Sobre el creador: portfolio y LinkedIn" title="Sobre el creador"><img src="logos/bellido.png" alt="" width="96" height="96"></button>
+      <a class="brand" href="#/teoria"><img class="emo" src="emojis/classical-building.webp" alt="" width="160" height="160" data-emoji="classical-building"><span class="brand-txt"><span class="brand-name">Palacio<span class="bn-long"> Estadístico</span></span><span class="brand-sub">AE II · Recuperatorio 1P</span></span></a>
     </div>
     <div class="stats">
       <span class="stat" id="statXp" title="Puntos de experiencia"><img class="emo" src="emojis/star.webp" alt="" width="160" height="160" data-emoji="star"><span id="xp">0</span><span class="sr-only"> puntos de experiencia</span></span>
@@ -778,7 +783,7 @@ a.mini-tag { min-height: 32px; padding: 0 var(--s3); font-size: 14px; }
   <p class="cm-sub">Estudiante de Ciencias Actuariales y analista de datos. ¿Adónde querés ir?</p>
   <ul class="cm-list">
     <li style="--i:0"><a class="accion accion--principal" href="https://matiasbellido.vercel.app/" target="_blank" rel="noopener noreferrer"><span class="accion__brillo" aria-hidden="true"></span><span class="accion__icono"><img src="logos/bellido.png" alt="" width="96" height="96"></span><span class="accion__texto"><strong>Ver el portfolio del creador</strong><span>Proyectos, experiencia y contacto. Se abre en otra pestaña.</span></span><span class="accion__flecha" aria-hidden="true">→</span></a></li>
-    <li style="--i:1"><a class="accion" href="https://www.linkedin.com/in/matiasbellido/" target="_blank" rel="noopener noreferrer"><span class="accion__icono accion__icono--app"><img src="logos/linkedin.png" alt="" width="32" height="32"></span><span class="accion__texto"><strong>Ir al LinkedIn del creador</strong><span>Perfil profesional. Se abre en otra pestaña.</span></span><span class="accion__flecha" aria-hidden="true">→</span></a></li>
+    <li style="--i:1"><a class="accion" href="https://www.linkedin.com/in/matiasbellido/" target="_blank" rel="noopener noreferrer"><span class="accion__icono accion__icono--logo"><img src="logos/linkedin.png?v=2" alt="" width="128" height="128"></span><span class="accion__texto"><strong>Ir al LinkedIn del creador</strong><span>Perfil profesional. Se abre en otra pestaña.</span></span><span class="accion__flecha" aria-hidden="true">→</span></a></li>
   </ul>
 </div>
 
